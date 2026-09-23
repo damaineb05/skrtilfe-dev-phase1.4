@@ -1,0 +1,58 @@
+{
+  "name": "Reaction",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post being reacted to"
+    },
+    "comment_id": {
+      "type": "string",
+      "description": "ID of the comment being reacted to (optional)"
+    },
+    "user_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the user reacting"
+    },
+    "reaction_type": {
+      "type": "string",
+      "enum": [
+        "like",
+        "love",
+        "celebrate",
+        "insightful",
+        "curious"
+      ],
+      "default": "like",
+      "description": "Type of reaction"
+    }
+  },
+  "required": [
+    "user_email",
+    "reaction_type"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

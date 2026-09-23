@@ -1,0 +1,116 @@
+{
+  "name": "PlayerProfile",
+  "type": "object",
+  "description": "Game-side progression record for SKRTLIFE WORLD \u2014 keyed by the authenticated SKRTLIFE user id (same identity everywhere).",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Authenticated SKRTLIFE user id (master identifier)"
+    },
+    "username": {
+      "type": "string",
+      "description": "URL handle derived from the SKRTLIFE account"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "In-world display name"
+    },
+    "level": {
+      "type": "integer",
+      "default": 1
+    },
+    "xp": {
+      "type": "integer",
+      "default": 0
+    },
+    "reputation": {
+      "type": "integer",
+      "default": 0
+    },
+    "current_world": {
+      "type": "string",
+      "default": "block_001",
+      "description": "Which world/block the player last occupied"
+    },
+    "spawn_point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "last_position": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "last_rotation": {
+      "type": "number",
+      "default": 0
+    },
+    "last_played_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

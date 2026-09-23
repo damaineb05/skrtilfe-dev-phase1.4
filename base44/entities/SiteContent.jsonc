@@ -1,0 +1,70 @@
+{
+  "name": "SiteContent",
+  "type": "object",
+  "properties": {
+    "content_key": {
+      "type": "string",
+      "description": "Unique identifier for the content (e.g., 'homepage_hero', 'about_mission')"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "text",
+        "image",
+        "video",
+        "json",
+        "html"
+      ],
+      "description": "Type of content"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title for the content"
+    },
+    "value": {
+      "type": "string",
+      "description": "The content value (text, URL, JSON string, etc.)"
+    },
+    "placement": {
+      "type": "string",
+      "description": "Where this content is used (e.g., 'homepage', 'about_page', 'events_page')"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this content is currently active"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata like alt text, dimensions, etc."
+    },
+    "last_published": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this content was last published"
+    }
+  },
+  "required": [
+    "content_key",
+    "content_type",
+    "value"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

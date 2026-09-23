@@ -1,0 +1,126 @@
+{
+  "name": "NFTDraft",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "NFT title"
+    },
+    "description": {
+      "type": "string",
+      "description": "NFT description (markdown supported)"
+    },
+    "asset_url": {
+      "type": "string",
+      "description": "IPFS URL or RPM link for the main asset"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "3d",
+        "image",
+        "video",
+        "audio"
+      ],
+      "description": "Type of asset"
+    },
+    "asset_cid": {
+      "type": "string",
+      "description": "IPFS CID if uploaded"
+    },
+    "poster_url": {
+      "type": "string",
+      "description": "Thumbnail/poster image URL"
+    },
+    "collection_name": {
+      "type": "string",
+      "description": "Collection name"
+    },
+    "traits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trait_type": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "rarity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "trait_type",
+          "value"
+        ]
+      }
+    },
+    "supply_type": {
+      "type": "string",
+      "enum": [
+        "ERC-721",
+        "ERC-1155"
+      ],
+      "default": "ERC-721"
+    },
+    "supply": {
+      "type": "integer",
+      "default": 1,
+      "description": "Edition size for ERC-1155"
+    },
+    "price_eth": {
+      "type": "number",
+      "description": "Listing price in ETH"
+    },
+    "royalties_percent": {
+      "type": "number",
+      "default": 5,
+      "description": "Creator royalties percentage"
+    },
+    "external_url": {
+      "type": "string",
+      "description": "External link"
+    },
+    "unlockable_content": {
+      "type": "string",
+      "description": "Private content for token owner"
+    },
+    "sensitive_content": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "minting",
+        "minted",
+        "listed"
+      ],
+      "default": "draft"
+    },
+    "metadata_json": {
+      "type": "object",
+      "description": "Generated OpenSea-compatible metadata"
+    },
+    "mint_tx_hash": {
+      "type": "string",
+      "description": "Transaction hash after minting"
+    },
+    "contract_address": {
+      "type": "string",
+      "description": "Contract address after minting"
+    },
+    "token_id": {
+      "type": "string",
+      "description": "Token ID after minting"
+    }
+  },
+  "required": [
+    "title",
+    "asset_url",
+    "asset_type"
+  ]
+}

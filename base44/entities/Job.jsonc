@@ -1,0 +1,85 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "optimize_asset",
+        "build_staging",
+        "generate_code",
+        "process_glb",
+        "register_drop",
+        "custom"
+      ],
+      "description": "Type of job to execute"
+    },
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "queued"
+    },
+    "progress": {
+      "type": "integer",
+      "default": 0,
+      "description": "Progress percentage 0-100"
+    },
+    "input_data": {
+      "type": "object",
+      "description": "Input parameters for the job"
+    },
+    "output_data": {
+      "type": "object",
+      "description": "Results from the job"
+    },
+    "logs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Job execution logs"
+    },
+    "related_asset_id": {
+      "type": "string"
+    },
+    "related_task_id": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error_message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "title"
+  ]
+}

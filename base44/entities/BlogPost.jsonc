@@ -1,0 +1,93 @@
+{
+  "name": "BlogPost",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Blog post title"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly version of the title"
+    },
+    "content": {
+      "type": "string",
+      "description": "Blog post content in Markdown format"
+    },
+    "excerpt": {
+      "type": "string",
+      "description": "Short summary of the post"
+    },
+    "featured_image": {
+      "type": "string",
+      "format": "uri",
+      "description": "Cover image URL for the post"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "News",
+        "Drops",
+        "Behind The Scenes",
+        "Community",
+        "Tech"
+      ],
+      "default": "News"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "published",
+        "draft"
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "content",
+    "excerpt",
+    "category",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

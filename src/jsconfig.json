@@ -1,0 +1,88 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    /* JS files: no aggressive type-checking — signal over noise */
+    "checkJs": false,
+    "allowJs": true,
+    "strict": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    /* Suppress `three` / WebGL type noise */
+    "types": []
+  },
+  /* ── Active production surface only ─────────────────────── */
+  "include": [
+    "src/pages/**/*",
+    "src/components/ui/**/*",
+    "src/components/layout/**/*",
+    "src/components/account/**/*",
+    "src/components/shop/**/*",
+    "src/components/product/**/*",
+    "src/components/checkout/**/*",
+    "src/components/community/**/*",
+    "src/components/dashboard/**/*",
+    "src/components/messaging/**/*",
+    "src/components/web3/**/*",
+    "src/components/auth/**/*",
+    "src/components/avatar/**/*",
+    "src/components/admin/**/*",
+    "src/components/analytics/**/*",
+    "src/components/genesis/**/*",
+    "src/components/events/**/*",
+    "src/components/home/**/*",
+    "src/components/social/**/*",
+    "src/components/payments/**/*",
+    "src/lib/**/*",
+    "src/hooks/**/*",
+    "src/utils/**/*",
+    "src/api/**/*",
+    "src/App.jsx",
+    "src/main.jsx",
+    "src/index.css"
+  ],
+  /* ── Excluded: unstable / experimental / deprecated ─────── */
+  "exclude": [
+    /* Experimental 3D / DripSync — not stable, high three.js type noise */
+    "src/components/dripsync/**/*",
+    "src/components/dripsync2/**/*",
+    "src/components/home/DripSyncPreview*",
+    "src/components/home/DripSyncPreviewViewport*",
+    "src/components/home/Scene3D*",
+    "src/components/home/StudioViewport*",
+    "src/components/utils/OptimizedScene3D*",
+    "src/components/utils/glbValidator*",
+    "src/components/utils/rpmAnimationLibrary*",
+    "src/components/utils/rpmHelpers*",
+    "src/components/utils/assetTracker*",
+    /* Studio — removed from active scope */
+    "src/components/studio/**/*",
+    /* Asset loader / uploader — experimental pipeline */
+    "src/components/asset-loader/**/*",
+    /* Marketplace experimental panels */
+    "src/components/marketplace/**/*",
+    /* Multiplayer — not in production */
+    "src/components/multiplayer/**/*",
+    /* Streaming — experimental */
+    "src/components/streaming/**/*",
+    /* NFT minting pipeline */
+    "src/components/nft/**/*",
+    /* Deno backend functions — different runtime, not browser JS */
+    "src/functions/**/*",
+    /* Society/presence — experimental */
+    "src/components/society/**/*",
+    /* Assistant / AI panels */
+    "src/components/assistant/**/*",
+    /* node_modules */
+    "node_modules/**/*"
+  ]
+}

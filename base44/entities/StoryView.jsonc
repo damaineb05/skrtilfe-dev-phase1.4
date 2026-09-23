@@ -1,0 +1,23 @@
+{
+  "name": "StoryView",
+  "type": "object",
+  "properties": {
+    "story_id": {
+      "type": "string",
+      "description": "ID of the story viewed"
+    },
+    "viewer_email": {
+      "type": "string",
+      "description": "Email of the viewer"
+    },
+    "viewed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the story was viewed"
+    }
+  },
+  "required": [
+    "story_id",
+    "viewer_email"
+  ]
+}

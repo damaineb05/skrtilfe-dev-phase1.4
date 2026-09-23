@@ -1,0 +1,123 @@
+{
+  "name": "Asset",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Public URL of the asset"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the asset"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video",
+        "3d_model",
+        "document",
+        "other"
+      ],
+      "default": "image"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "upload",
+        "ai_generated",
+        "external",
+        "product",
+        "blog",
+        "avatar"
+      ],
+      "default": "upload",
+      "description": "Where the asset came from"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "mime_type": {
+      "type": "string",
+      "description": "MIME type of the file"
+    },
+    "width": {
+      "type": "integer",
+      "description": "Image width in pixels"
+    },
+    "height": {
+      "type": "integer",
+      "description": "Image height in pixels"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for organizing assets"
+    },
+    "folder": {
+      "type": "string",
+      "default": "Uncategorized",
+      "description": "Folder for organization"
+    },
+    "alt_text": {
+      "type": "string",
+      "description": "Alt text for accessibility"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "AI prompt if generated"
+    },
+    "related_entity": {
+      "type": "string",
+      "description": "Related entity type (Product, BlogPost, etc.)"
+    },
+    "related_entity_id": {
+      "type": "string",
+      "description": "ID of the related entity"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "url",
+    "name",
+    "type",
+    "source"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "name": "UserInventory",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "wearable",
+        "environment",
+        "emote",
+        "bundle"
+      ]
+    },
+    "asset_url": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "thumbnail_url": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "acquired_from": {
+      "type": "string",
+      "enum": [
+        "purchase",
+        "created",
+        "gift",
+        "reward",
+        "default"
+      ],
+      "default": "purchase"
+    },
+    "listing_id": {
+      "type": "string",
+      "description": "Original listing ID if purchased"
+    },
+    "is_equipped": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_tradeable": {
+      "type": "boolean",
+      "default": true
+    },
+    "asset_metadata": {
+      "type": "object"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "common",
+        "uncommon",
+        "rare",
+        "epic",
+        "legendary"
+      ],
+      "default": "common"
+    }
+  },
+  "required": [
+    "user_email",
+    "asset_type",
+    "asset_url",
+    "asset_name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

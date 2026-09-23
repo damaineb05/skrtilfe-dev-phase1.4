@@ -1,0 +1,106 @@
+{
+  "name": "AssistantTask",
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "User's prompt or question"
+    },
+    "reply": {
+      "type": "string",
+      "description": "Assistant's response"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Suggested actions from the assistant"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "completed",
+        "failed",
+        "requires_approval"
+      ],
+      "default": "pending"
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": false
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of approver if approved"
+    },
+    "context_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of context documents used"
+    },
+    "code_generated": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "prompt"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

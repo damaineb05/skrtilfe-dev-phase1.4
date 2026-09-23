@@ -1,0 +1,145 @@
+{
+  "name": "Wearable",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Wearable item name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Item description and lore"
+    },
+    "creator_id": {
+      "type": "string",
+      "description": "Reference to Creator entity"
+    },
+    "model_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL to the .glb 3D model"
+    },
+    "texture_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL to the texture map"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Preview thumbnail for fast loading"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "top",
+        "bottom",
+        "shoes",
+        "headwear",
+        "accessory",
+        "full_body",
+        "eyewear",
+        "bag"
+      ],
+      "description": "Clothing slot category"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "common",
+        "rare",
+        "epic",
+        "legendary"
+      ],
+      "default": "common",
+      "description": "Rarity tier for scarcity and hype mechanics"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Explicit free/starter item \u2014 equippable WITHOUT an AssetOwnership record. Do NOT infer free from price === 0; this flag is the only source of default/free status."
+    },
+    "compatible_rigs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of compatible rig types e.g. ['humanoid']"
+    },
+    "is_nft": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this wearable is an on-chain NFT"
+    },
+    "max_supply": {
+      "type": "integer",
+      "description": "Maximum number of copies (null = unlimited)"
+    },
+    "current_supply": {
+      "type": "integer",
+      "default": 0,
+      "description": "How many have been minted/sold"
+    },
+    "price": {
+      "type": "number",
+      "description": "Base price in USD or ETH"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "USD",
+        "ETH",
+        "USDC"
+      ],
+      "default": "USD"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "state": {
+      "type": "object",
+      "description": "Dynamic NFT state \u2014 changes based on usage or unlocks"
+    },
+    "wear_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total times this wearable has been worn across all users"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Searchable tags e.g. ['genesis', 'limited', 'cyberpunk']"
+    }
+  },
+  "required": [
+    "name",
+    "model_url",
+    "category"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

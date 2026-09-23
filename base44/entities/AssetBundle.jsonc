@@ -1,0 +1,96 @@
+{
+  "name": "AssetBundle",
+  "type": "object",
+  "properties": {
+    "bundle_id": {
+      "type": "string",
+      "description": "Unique identifier for the asset bundle"
+    },
+    "name": {
+      "type": "string",
+      "description": "Bundle name (derived from ZIP filename)"
+    },
+    "source_zip_name": {
+      "type": "string",
+      "description": "Original ZIP file name"
+    },
+    "zip_file_url": {
+      "type": "string",
+      "description": "URL to uploaded ZIP file"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "uploaded",
+        "processing",
+        "ready",
+        "error"
+      ],
+      "default": "uploaded",
+      "description": "Processing status"
+    },
+    "scan_options": {
+      "type": "object",
+      "properties": {
+        "exact_scan": {
+          "type": "boolean"
+        },
+        "scan_programming": {
+          "type": "boolean"
+        },
+        "validate_structure": {
+          "type": "boolean"
+        },
+        "check_dependencies": {
+          "type": "boolean"
+        },
+        "analyze_assets": {
+          "type": "boolean"
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "model",
+              "texture",
+              "shader",
+              "code",
+              "metadata",
+              "other"
+            ]
+          },
+          "extension": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "List of extracted asset files"
+    },
+    "total_files": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total number of files in bundle"
+    },
+    "file_size_mb": {
+      "type": "number",
+      "description": "Total size in megabytes"
+    }
+  },
+  "required": [
+    "bundle_id",
+    "name",
+    "source_zip_name"
+  ]
+}

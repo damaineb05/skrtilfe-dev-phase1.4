@@ -1,0 +1,135 @@
+{
+  "name": "Event",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "Short tagline for the event"
+    },
+    "description": {
+      "type": "string",
+      "description": "Full event description"
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Event banner image"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event date and time"
+    },
+    "time": {
+      "type": "string",
+      "description": "Human-readable time (e.g., '6:00 PM EST')"
+    },
+    "location": {
+      "type": "string",
+      "description": "Event location (physical address or 'Virtual')"
+    },
+    "location_type": {
+      "type": "string",
+      "enum": [
+        "physical",
+        "virtual",
+        "hybrid"
+      ],
+      "default": "virtual"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "drop",
+        "community",
+        "exclusive",
+        "workshop"
+      ],
+      "default": "community"
+    },
+    "price": {
+      "type": "number",
+      "description": "Ticket price in USD (0 for free events)"
+    },
+    "service_fee": {
+      "type": "number",
+      "description": "Platform service fee in USD",
+      "default": 0
+    },
+    "capacity": {
+      "type": "integer",
+      "description": "Maximum attendees (null for unlimited)"
+    },
+    "tickets_sold": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of tickets sold"
+    },
+    "is_exclusive": {
+      "type": "boolean",
+      "default": false,
+      "description": "Requires Genesis Pass"
+    },
+    "requires_genesis": {
+      "type": "boolean",
+      "default": false,
+      "description": "Genesis Pass holders only"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "live",
+        "ended",
+        "cancelled"
+      ],
+      "default": "upcoming"
+    },
+    "stripe_product_id": {
+      "type": "string",
+      "description": "Stripe product ID for this event"
+    },
+    "stripe_price_id": {
+      "type": "string",
+      "description": "Stripe price ID for tickets"
+    },
+    "virtual_link": {
+      "type": "string",
+      "description": "Zoom/Meet link for virtual events"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional event metadata"
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "date",
+    "location",
+    "event_type",
+    "price"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

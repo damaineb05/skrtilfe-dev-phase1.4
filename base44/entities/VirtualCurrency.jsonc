@@ -1,0 +1,55 @@
+{
+  "name": "VirtualCurrency",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "User who owns this wallet"
+    },
+    "balance": {
+      "type": "number",
+      "default": 100,
+      "description": "Current balance in DripCoins"
+    },
+    "lifetime_earned": {
+      "type": "number",
+      "default": 0,
+      "description": "Total coins earned over time"
+    },
+    "lifetime_spent": {
+      "type": "number",
+      "default": 0,
+      "description": "Total coins spent over time"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

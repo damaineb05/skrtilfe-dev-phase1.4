@@ -1,0 +1,60 @@
+{
+  "name": "Story",
+  "type": "object",
+  "properties": {
+    "media_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the story image or video"
+    },
+    "media_type": {
+      "type": "string",
+      "enum": [
+        "image",
+        "video"
+      ],
+      "default": "image"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Optional story caption"
+    },
+    "duration": {
+      "type": "integer",
+      "default": 5,
+      "description": "How long to display in seconds"
+    },
+    "views_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "viewers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who viewed"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When story expires (24 hours from creation)"
+    },
+    "is_archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Swipe-up link URL"
+    },
+    "link_text": {
+      "type": "string",
+      "description": "Swipe-up link text"
+    }
+  },
+  "required": [
+    "media_url",
+    "media_type"
+  ]
+}

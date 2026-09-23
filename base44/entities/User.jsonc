@@ -1,0 +1,366 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "profile_image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for the user's profile picture"
+    },
+    "bio": {
+      "type": "string",
+      "description": "A short user biography"
+    },
+    "location": {
+      "type": "string",
+      "description": "User's city or location"
+    },
+    "twitter_handle": {
+      "type": "string",
+      "description": "User's Twitter @ handle"
+    },
+    "instagram_handle": {
+      "type": "string",
+      "description": "User's Instagram @ handle"
+    },
+    "discord_username": {
+      "type": "string",
+      "description": "User's Discord username"
+    },
+    "website_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "User's personal or portfolio website"
+    },
+    "phone": {
+      "type": "string",
+      "description": "User's phone number"
+    },
+    "is_admin": {
+      "type": "boolean",
+      "default": false,
+      "description": "Legacy admin flag, prefer role-based access"
+    },
+    "genesis_holder": {
+      "type": "boolean",
+      "default": false,
+      "description": "Canonical Genesis membership flag. Set SERVER-SIDE by the Stripe webhook on a verified genesis_pass checkout (and by grantGenesisPass). hasGenesisAccess() reads this; admins inherit. Authoritative Genesis entitlement \u2014 never set from the client."
+    },
+    "dripsync_plus_holder": {
+      "type": "boolean",
+      "default": false,
+      "description": "Canonical DripSync+ membership flag. Set SERVER-SIDE by the Stripe webhook on a verified dripsync_plus checkout. Authoritative DripSync+ entitlement \u2014 never set from the client. Membership state lives here (profile/account), NEVER on avatar_config."
+    },
+    "membership_offer_seen": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has already seen the initial post-identity membership offer. Suppresses repeat immediate offers (no nag). Set client-side via updateMe on dismiss/continue-free."
+    },
+    "shipping_address": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "street_address": {
+          "type": "string"
+        },
+        "apartment": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip_code": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "billing_address": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "street_address": {
+          "type": "string"
+        },
+        "apartment": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip_code": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "billing_same_as_shipping": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether billing address is same as shipping"
+    },
+    "genesis_pass_status": {
+      "type": "string",
+      "enum": [
+        "Holder",
+        "Not a Member"
+      ],
+      "default": "Not a Member",
+      "description": "User's Genesis NFT ownership status"
+    },
+    "social_connections": {
+      "type": "object",
+      "description": "OAuth connected social platforms",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "access_token": {
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "avatar_config": {
+      "type": "object",
+      "description": "Canonical DripSync avatar profile \u2014 how the user looks. Versioned (schema_version: 2). Ownership truth lives in AssetOwnership, NOT here. Legacy v1 records are normalized on read by normalizeAvatarConfig(). Membership/entitlement state is NEVER stored here (it lives on genesis_holder / dripsync_plus_holder).",
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "default": 2
+        },
+        "avatar": {
+          "type": "object",
+          "description": "The avatar body identity",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "RPM avatar id or null"
+            },
+            "model_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "GLB/RPM avatar body URL"
+            },
+            "source": {
+              "type": "string",
+              "enum": [
+                "rpm",
+                "upload",
+                "default",
+                "look",
+                "system",
+                "readyplayerme"
+              ]
+            },
+            "gender": {
+              "type": "string",
+              "enum": [
+                "masculine",
+                "feminine",
+                "neutral"
+              ]
+            }
+          }
+        },
+        "customization": {
+          "type": "object",
+          "description": "Appearance customization values",
+          "properties": {
+            "skinTone": {
+              "type": "string"
+            },
+            "eyeColor": {
+              "type": "string"
+            },
+            "hairColor": {
+              "type": "string"
+            },
+            "isVisible": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "equipped": {
+          "type": "array",
+          "description": "Currently equipped wearables \u2014 references only. Catalog items store wearable_id (ownership-enforced server-side); uploads store model_url. Transform overrides are per-user.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "wearable_id": {
+                "type": "string",
+                "description": "Reference to Wearable entity (catalog items only)"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "catalog",
+                  "upload"
+                ],
+                "description": "catalog = ownership-checked Wearable; upload = user-provided GLB URL"
+              },
+              "model_url": {
+                "type": "string",
+                "format": "uri",
+                "description": "GLB URL for upload-source items"
+              },
+              "name": {
+                "type": "string",
+                "description": "Optional display label (uploads)"
+              },
+              "position": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "description": "Per-user position override [x,y,z]"
+              },
+              "rotation": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "description": "Per-user rotation override [x,y,z]"
+              },
+              "scale": {
+                "type": "number",
+                "description": "Per-user scale override"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          }
+        },
+        "custom_animations": {
+          "type": "array",
+          "description": "Custom animation clips attached to the avatar",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "description": "Saved scene/environment config"
+        },
+        "current_realm": {
+          "type": "string",
+          "description": "Current realm id"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last server-validated save timestamp"
+        }
+      }
+    },
+    "saved_looks": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "navMode": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "advanced"
+          ],
+          "default": "standard"
+        },
+        "leftPanelOpen": {
+          "type": "boolean",
+          "default": true
+        },
+        "rightPanelOpen": {
+          "type": "boolean",
+          "default": true
+        },
+        "backgroundPreference": {
+          "type": "object"
+        },
+        "fpsCapEnabled": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "analytics_metadata": {
+      "type": "object",
+      "properties": {
+        "timeToFirstAvatar": {
+          "type": "number"
+        },
+        "avatarExportsCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "wearablesAttachedCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "looksSavedCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "looksSharedCount": {
+          "type": "integer",
+          "default": 0
+        },
+        "lastActiveDate": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "required": []
+}

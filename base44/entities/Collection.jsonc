@@ -1,0 +1,84 @@
+{
+  "name": "Collection",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "name": {
+      "type": "string"
+    },
+    "banner_image_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "logo_image_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "description": {
+      "type": "string"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "chain": {
+      "type": "string",
+      "enum": [
+        "ethereum",
+        "polygon",
+        "solana"
+      ],
+      "default": "ethereum"
+    },
+    "creator_id": {
+      "type": "string",
+      "description": "ID of the UserProfile who created it"
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "floor_price": {
+          "type": "number"
+        },
+        "volume_24h": {
+          "type": "number"
+        },
+        "listed_percentage": {
+          "type": "number"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "slug",
+    "name",
+    "creator_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

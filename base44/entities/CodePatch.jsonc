@@ -1,0 +1,61 @@
+{
+  "name": "CodePatch",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the code patch"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this patch does"
+    },
+    "file_path": {
+      "type": "string",
+      "description": "Target file path for the patch"
+    },
+    "code": {
+      "type": "string",
+      "description": "The generated code snippet"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "javascript",
+        "jsx",
+        "typescript",
+        "tsx",
+        "css",
+        "json",
+        "other"
+      ],
+      "default": "jsx"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "applied",
+        "rejected",
+        "archived"
+      ],
+      "default": "pending"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Related AssistantTask ID"
+    },
+    "applied_by": {
+      "type": "string",
+      "description": "Email of developer who applied this patch"
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "title",
+    "code"
+  ]
+}

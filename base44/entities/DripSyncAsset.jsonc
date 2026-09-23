@@ -1,0 +1,251 @@
+{
+  "name": "DripSyncAsset",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who owns this asset"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "avatar",
+        "look",
+        "outfit",
+        "scene"
+      ],
+      "description": "Asset type"
+    },
+    "name": {
+      "type": "string",
+      "description": "User-friendly name for the asset"
+    },
+    "avatarUrl": {
+      "type": "string",
+      "description": "RPM avatar URL or GLB model URL"
+    },
+    "avatarId": {
+      "type": "string",
+      "description": "RPM avatar ID if available"
+    },
+    "thumbnailUrl": {
+      "type": "string",
+      "description": "Screenshot/thumbnail of the asset"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "masculine",
+        "feminine",
+        "neutral"
+      ],
+      "default": "masculine",
+      "description": "Avatar gender \u2014 queryable root field (V2)"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "rpm",
+        "upload",
+        "default",
+        "look",
+        "system",
+        "readyplayerme"
+      ],
+      "description": "Origin of the avatar (V2)"
+    },
+    "schema_version": {
+      "type": "integer",
+      "default": 2,
+      "description": "Schema version for migration tracking"
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a saved default avatar"
+    },
+    "isStarter": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the user's starter avatar"
+    },
+    "is_public_template": {
+      "type": "boolean",
+      "default": false,
+      "description": "Owner-published community template. When true, any authenticated user can READ this record (avatar data only) to load a copy into their own editor. The original is never mutated by other users \u2014 only the owner/admin can update it. Account info (user_id / created_by_id) is never surfaced in the template catalog UI."
+    },
+    "template_name": {
+      "type": "string",
+      "description": "Public display name shown in the community template catalog. Falls back to `name` when empty."
+    },
+    "template_order": {
+      "type": "integer",
+      "default": 0,
+      "description": "Curated ordering in the template catalog (lower = earlier)."
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "avatarUrl": {
+          "type": "string",
+          "description": "V1 compat: redundant avatar URL in metadata"
+        },
+        "avatarType": {
+          "type": "string",
+          "description": "V1 compat: gender field stored as avatarType"
+        },
+        "gender": {
+          "type": "string",
+          "description": "V2: explicit gender field"
+        },
+        "source": {
+          "type": "string",
+          "description": "Origin source of the avatar"
+        },
+        "asset_version": {
+          "type": "integer",
+          "description": "Metadata schema version"
+        },
+        "customization": {
+          "type": "object",
+          "properties": {
+            "skinTone": {
+              "type": "string"
+            },
+            "eyeColor": {
+              "type": "string"
+            },
+            "hairColor": {
+              "type": "string"
+            },
+            "isVisible": {
+              "type": "boolean"
+            }
+          },
+          "description": "Avatar appearance customization"
+        },
+        "wearables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "slot": {
+                "type": "string"
+              },
+              "bone": {
+                "type": "string"
+              },
+              "position": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "rotation": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "scale": {
+                "type": "number"
+              },
+              "color": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Equipped wearables with transforms"
+        },
+        "animations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Custom animations"
+        },
+        "environment": {
+          "type": "object",
+          "description": "Scene/environment config"
+        },
+        "currentRealm": {
+          "type": "object",
+          "description": "Realm config"
+        }
+      },
+      "description": "Complete asset metadata (V1+V2 compatible)"
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.is_public_template": true
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

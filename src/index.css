@@ -1,0 +1,412 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.cdnfonts.com/css/harvest');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap');
+
+@font-face {
+  font-family: "HarvestItal";
+  src: url("https://db.onlinewebfonts.com/t/3bba79b73cea10d4ff652c6a34699ddf.woff2") format("woff2"),
+       url("https://db.onlinewebfonts.com/t/3bba79b73cea10d4ff652c6a34699ddf.woff") format("woff"),
+       url("https://db.onlinewebfonts.com/t/3bba79b73cea10d4ff652c6a34699ddf.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --skrt-cyan:   #00D4FF;
+  --skrt-red:    #FF3366;
+  --skrt-yellow: #FFD700;
+  --skrt-dark:   #0A0A0F;
+
+  /* Backgrounds */
+  --bg-0: #070709;
+  --bg-1: #0A0A0F;
+  --bg-2: #0D0D16;
+  --bg-3: #12121E;
+  --bg-4: #181826;
+  --bg-card: rgba(255,255,255,0.028);
+  --bg-card-hover: rgba(255,255,255,0.048);
+
+  /* Text */
+  --text-100: #FFFFFF;
+  --text-80:  rgba(255,255,255,0.80);
+  --text-60:  rgba(255,255,255,0.60);
+  --text-40:  rgba(255,255,255,0.40);
+  --text-25:  rgba(255,255,255,0.25);
+  --text-12:  rgba(255,255,255,0.12);
+
+  /* Glass */
+  --glass-border:  rgba(255,255,255,0.08);
+  --glass-border-bright: rgba(255,255,255,0.14);
+  --glass-bg:      rgba(255,255,255,0.03);
+  --glass-bg-mid:  rgba(255,255,255,0.06);
+
+  /* Shadows */
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.35);
+  --shadow-md:  0 4px 24px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 48px rgba(0,0,0,0.65);
+  --shadow-xl:  0 20px 80px rgba(0,0,0,0.75);
+
+  /* Glow */
+  --glow-cyan:   0 0 24px rgba(0,212,255,0.20), 0 0 60px rgba(0,212,255,0.07);
+  --glow-red:    0 0 24px rgba(255,51,102,0.20);
+  --glow-yellow: 0 0 24px rgba(255,215,0,0.20);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+
+  /* Spacing scale (8pt grid) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Typography */
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Harvest', 'Inter', sans-serif;
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-in:  cubic-bezier(0.4, 0.0, 1, 1);
+  --ease-io:  cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ShadCN compatibility */
+  --background: 0 0% 4%;
+  --foreground: 0 0% 100%;
+  --card: 240 10% 7%;
+  --card-foreground: 0 0% 100%;
+  --popover: 240 10% 6%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 240 6% 12%;
+  --secondary-foreground: 0 0% 85%;
+  --muted: 240 6% 12%;
+  --muted-foreground: 0 0% 50%;
+  --accent: 240 6% 14%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 72% 56%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5% 13%;
+  --input: 240 5% 13%;
+  --ring: 195 100% 50%;
+  --radius: 0.65rem;
+
+  --sidebar-background: 240 10% 6%;
+  --sidebar-foreground: 240 5% 80%;
+  --sidebar-primary: 195 100% 50%;
+  --sidebar-primary-foreground: 0 0% 5%;
+  --sidebar-accent: 240 5% 10%;
+  --sidebar-accent-foreground: 0 0% 85%;
+  --sidebar-border: 240 5% 11%;
+  --sidebar-ring: 195 100% 50%;
+
+  --chart-1: 195 100% 50%;
+  --chart-2: 330 100% 60%;
+  --chart-3: 48 100% 50%;
+  --chart-4: 270 80% 65%;
+  --chart-5: 150 80% 50%;
+}
+
+/* ─── Reset & Base ───────────────────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-1);
+    color: var(--text-100);
+    font-size: 15px;
+    line-height: 1.65;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Typography scale */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+    color: var(--text-100);
+  }
+  h1 { font-size: clamp(2.25rem, 5vw, 4rem);   letter-spacing: -0.045em; }
+  h2 { font-size: clamp(1.75rem, 3.5vw, 2.8rem); }
+  h3 { font-size: clamp(1.25rem, 2.5vw, 1.8rem); }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.05rem; }
+  h6 { font-size: 0.9rem; }
+
+  p { color: var(--text-60); line-height: 1.7; }
+
+  a { color: inherit; text-decoration: none; transition: color 0.18s var(--ease-io); }
+
+  img, video { display: block; max-width: 100%; }
+
+  input, textarea, select, button {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  ::selection {
+    background: rgba(0,212,255,0.25);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--skrt-cyan);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* ShadCN */
+  * { @apply border-border; }
+}
+
+/* ─── Glass Utility System ───────────────────────────────────────────────────── */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-mid {
+    background: var(--glass-bg-mid);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid var(--glass-border-bright);
+  }
+
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    transition: background 0.2s var(--ease-io), border-color 0.2s var(--ease-io), transform 0.2s var(--ease-io), box-shadow 0.2s var(--ease-io);
+  }
+  .glass-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--glass-border-bright);
+  }
+
+  /* DripSync compat */
+  .glass-panel {
+    background: rgba(12, 12, 20, 0.68);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .glass-panel-drip {
+    background: rgba(8,10,18,0.80);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .glass-panel-light {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ─── Glow Utilities ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  .glow-cyan   { box-shadow: var(--glow-cyan); }
+  .glow-red    { box-shadow: var(--glow-red); }
+  .glow-yellow { box-shadow: var(--glow-yellow); }
+
+  .soft-glow-cyan   { box-shadow: 0 0 20px rgba(0,212,255,0.15), 0 0 60px rgba(0,212,255,0.05); }
+  .soft-glow-purple { box-shadow: 0 0 20px rgba(168,85,247,0.15), 0 0 60px rgba(168,85,247,0.05); }
+  .soft-glow-panel  { box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05); }
+
+  /* Text utilities */
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, var(--skrt-cyan), #66e0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-brand {
+    background: linear-gradient(135deg, var(--skrt-cyan) 0%, var(--skrt-red) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Label / tag */
+  .label-xs {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--text-40);
+  }
+  .label-sm {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-40);
+  }
+
+  /* Section container */
+  .section-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 48px);
+  }
+
+  /* Dividers */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--glass-border);
+    margin: var(--sp-8) 0;
+  }
+
+  /* Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 4px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Subtle noise texture overlay for depth */
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+  }
+}
+
+/* ─── Hover + Interaction Micro-animations ───────────────────────────────────── */
+.drip-item {
+  transition: transform 0.18s var(--ease-spring), box-shadow 0.18s var(--ease-io), border-color 0.18s var(--ease-io);
+  cursor: pointer;
+  will-change: transform;
+}
+.drip-item:hover {
+  transform: translateY(-2px) scale(1.012);
+  box-shadow: 0 6px 24px rgba(0,212,255,0.12), 0 0 0 1px rgba(0,212,255,0.18);
+  border-color: rgba(0,212,255,0.25) !important;
+}
+.drip-item:active { transform: scale(0.975); }
+
+/* Lift card — generic hover lift */
+.lift {
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-io);
+  will-change: transform;
+}
+.lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+.lift:active { transform: translateY(-1px); }
+
+/* Glow button pulse feedback */
+.pulse-feedback { animation: quickPulse 0.5s ease-out; }
+@keyframes quickPulse {
+  0%  { box-shadow: 0 0 0 0 rgba(0,212,255,0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(0,212,255,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+}
+
+/* ─── Page Transition ────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.28s var(--ease-out) forwards; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fadeIn 0.22s var(--ease-out) forwards; }
+
+/* ─── Shimmer Skeleton ───────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%  { background-position: -200% 0; }
+  100%{ background-position:  200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.07) 50%,
+    rgba(255,255,255,0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* ─── DripSync Viewport ──────────────────────────────────────────────────────── */
+.dripsync-viewport { cursor: crosshair; }
+.dripsync-viewport:hover { cursor: default; }
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 auto 14px;
+}
+
+/* ─── Tab active ─────────────────────────────────────────────────────────────── */
+.tab-button-drip {
+  transition: background 0.18s var(--ease-io), color 0.18s var(--ease-io);
+  cursor: pointer;
+}
+.tab-button-drip.active {
+  background: rgba(0,212,255,0.10);
+  box-shadow: inset 0 0 16px rgba(0,212,255,0.07);
+}
+
+/* ─── Font helpers ───────────────────────────────────────────────────────────── */
+.font-harvest { font-family: 'Harvest', sans-serif !important; }
+.font-harvestital { font-family: 'HarvestItal', sans-serif !important; }
+
+/* ─── Apple-site wrapper (layout compat) ─────────────────────────────────────── */
+.apple-site {
+  min-height: 100vh;
+  background: var(--bg-1);
+}
+
+/* ─── World overlay responsive (Phase F.5 §19) ──────────────────────────────── */
+@media (max-width: 600px) {
+  .store-grid { grid-template-columns: 1fr !important; }
+}

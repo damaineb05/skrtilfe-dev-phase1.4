@@ -1,0 +1,119 @@
+{
+  "name": "CreatorProfile",
+  "type": "object",
+  "description": "Creator entity \u2014 powers the creator marketplace, royalties, and brand identity.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the User account"
+    },
+    "brand_name": {
+      "type": "string",
+      "description": "Public creator / brand name"
+    },
+    "brand_logo_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Brand logo image"
+    },
+    "brand_banner_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Brand banner image"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Creator bio and brand story"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Platform-verified creator status"
+    },
+    "royalty_percentage": {
+      "type": "number",
+      "default": 5,
+      "description": "Royalty % earned on secondary sales (0-30)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "active",
+        "suspended"
+      ],
+      "default": "pending"
+    },
+    "total_items": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total wearables created"
+    },
+    "total_sales_volume": {
+      "type": "number",
+      "default": 0,
+      "description": "Lifetime sales volume in USD"
+    },
+    "featured_placements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "homepage",
+          "marketplace_featured",
+          "discover",
+          "drop_hero"
+        ]
+      },
+      "description": "Where this creator is featured on the platform"
+    },
+    "social_links": {
+      "type": "object",
+      "properties": {
+        "twitter": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "brand_name"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

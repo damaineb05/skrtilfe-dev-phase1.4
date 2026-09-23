@@ -1,0 +1,50 @@
+{
+  "name": "CreatorSubscriber",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Subscriber email address"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["creator_toggle", "landing_page", "other"],
+      "default": "creator_toggle",
+      "description": "Where the subscriber came from"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["subscribed", "unsubscribed"],
+      "default": "subscribed",
+      "description": "Current subscription status"
+    },
+    "subscribed_to": {
+      "type": "object",
+      "properties": {
+        "creator_updates": {
+          "type": "boolean",
+          "default": true
+        },
+        "product_drops": {
+          "type": "boolean",
+          "default": true
+        },
+        "dripsync_updates": {
+          "type": "boolean",
+          "default": true
+        },
+        "genesis_updates": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "description": "Newsletter category preferences"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Base44 user ID if signed in"
+    }
+  },
+  "required": ["email", "source"]
+}

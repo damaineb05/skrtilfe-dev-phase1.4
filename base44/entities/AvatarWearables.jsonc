@@ -1,0 +1,64 @@
+{
+  "name": "AvatarWearables",
+  "type": "object",
+  "description": "Tracks what a specific avatar is currently wearing \u2014 the DripSync live outfit system.",
+  "properties": {
+    "avatar_id": {
+      "type": "string",
+      "description": "Reference to the Avatar entity"
+    },
+    "wearable_id": {
+      "type": "string",
+      "description": "Reference to the Wearable entity"
+    },
+    "ownership_id": {
+      "type": "string",
+      "description": "Reference to the AssetOwnership record for verification"
+    },
+    "slot": {
+      "type": "string",
+      "enum": [
+        "head",
+        "torso",
+        "legs",
+        "feet",
+        "accessory",
+        "eyewear",
+        "bag",
+        "full_body"
+      ],
+      "description": "Which clothing slot this wearable occupies"
+    },
+    "transform": {
+      "type": "object",
+      "description": "3D transform overrides for this wearable on this avatar",
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "rotation": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "scale": {
+          "type": "number"
+        }
+      }
+    },
+    "equipped_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this item was equipped"
+    }
+  },
+  "required": [
+    "avatar_id",
+    "wearable_id",
+    "slot"
+  ]
+}

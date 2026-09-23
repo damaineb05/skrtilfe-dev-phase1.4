@@ -1,0 +1,98 @@
+{
+  "name": "Creator",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Creator's display name"
+    },
+    "handle": {
+      "type": "string",
+      "description": "Unique creator handle/username"
+    },
+    "bio": {
+      "type": "string",
+      "description": "Creator biography"
+    },
+    "avatar_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Profile avatar image URL"
+    },
+    "banner_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Profile banner image URL"
+    },
+    "website": {
+      "type": "string",
+      "format": "uri",
+      "description": "Creator's website"
+    },
+    "twitter": {
+      "type": "string",
+      "description": "Twitter handle (without @)"
+    },
+    "instagram": {
+      "type": "string",
+      "description": "Instagram handle (without @)"
+    },
+    "discord": {
+      "type": "string",
+      "description": "Discord username#discriminator"
+    },
+    "collections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of collection slugs this creator is associated with"
+    },
+    "featured_placements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "homepage_highlight",
+          "marketplace_featured",
+          "discover_highlight",
+          "hero_creator"
+        ]
+      },
+      "description": "Where this creator should be featured on the site"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "pending"
+      ],
+      "default": "active",
+      "description": "Creator status"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the creator is verified"
+    },
+    "total_items": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total number of items created"
+    },
+    "total_sales": {
+      "type": "number",
+      "default": 0,
+      "description": "Total sales volume in USD"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional creator metadata"
+    }
+  },
+  "required": [
+    "name",
+    "handle"
+  ]
+}

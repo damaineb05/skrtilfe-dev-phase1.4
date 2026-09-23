@@ -1,0 +1,316 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly version of title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "sku": {
+      "type": "string",
+      "description": "Parent product SKU"
+    },
+    "barcode": {
+      "type": "string",
+      "description": "Product barcode (optional)"
+    },
+    "price": {
+      "type": "number",
+      "description": "Base price in USD"
+    },
+    "compare_at_price": {
+      "type": "number",
+      "description": "Original price for discounts"
+    },
+    "inventory_qty": {
+      "type": "integer",
+      "description": "Total inventory across all variants"
+    },
+    "low_stock_threshold": {
+      "type": "integer",
+      "default": 5
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "collection": {
+      "type": "string",
+      "enum": [
+        "Light",
+        "Dark",
+        "Limited/Collab",
+        "Genesis"
+      ]
+    },
+    "product_type": {
+      "type": "string",
+      "enum": [
+        "physical",
+        "nft",
+        "3d_nft",
+        "physical_and_nft",
+        "wearable"
+      ],
+      "default": "physical",
+      "description": "Type of product"
+    },
+    "wearable_id": {
+      "type": "string",
+      "description": "Explicit reference to the Wearable entity granted as the digital entitlement on purchase. Empty/null for physical-only products. Used when ALL variants grant the same digital wearable; per-variant overrides live on variants[].wearable_id. This is the authoritative Product -> Wearable link; wearable_slot is presentation metadata only."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Product tags (Limited, Preorder, etc.)"
+    },
+    "available_sizes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "XS",
+          "S",
+          "M",
+          "L",
+          "XL",
+          "XXL"
+        ]
+      },
+      "description": "All available sizes across variants"
+    },
+    "available_colors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hex": {
+            "type": "string",
+            "description": "Hex color code"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Swatch image"
+          }
+        }
+      },
+      "description": "All available colors"
+    },
+    "variants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "description": "Variant-specific price (overrides base if set)"
+          },
+          "inventory_qty": {
+            "type": "integer"
+          },
+          "weight": {
+            "type": "number",
+            "description": "Shipping weight"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "wearable_id": {
+            "type": "string",
+            "description": "Explicit reference to the Wearable entity granted for THIS variant. Overrides Product.wearable_id when set (per-SKU colorway/model). Empty/null falls back to Product.wearable_id. Authoritative Product -> Wearable link."
+          }
+        },
+        "required": [
+          "id",
+          "sku",
+          "size",
+          "color",
+          "inventory_qty"
+        ]
+      }
+    },
+    "media": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "alt_text": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video",
+              "3d"
+            ]
+          },
+          "color": {
+            "type": "string",
+            "description": "Associate media with specific color"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "model_3d_url": {
+      "type": "string",
+      "description": "URL to the 3D model file (.glb or .gltf) for try-on features"
+    },
+    "wearable_slot": {
+      "type": "string",
+      "enum": [
+        "top",
+        "bottom",
+        "shoes",
+        "headwear",
+        "accessory",
+        "full_body",
+        "gloves",
+        "eyewear",
+        "jewelry",
+        "bag"
+      ],
+      "description": "Clothing slot this wearable occupies (presentation metadata, NOT identity)"
+    },
+    "wearable_bone": {
+      "type": "string",
+      "default": "Hips",
+      "description": "Default bone attachment point for avatar (e.g., Head, Hips, Spine, LeftFoot, RightFoot)"
+    },
+    "wearable_position": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "description": "Default position offset [x, y, z]"
+    },
+    "wearable_rotation": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "description": "Default rotation [x, y, z] in radians"
+    },
+    "wearable_scale": {
+      "type": "number",
+      "default": 1,
+      "description": "Default scale multiplier"
+    },
+    "replaces_slots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Additional slots this item replaces (e.g., full_body replaces top+bottom)"
+    },
+    "lore": {
+      "type": "string",
+      "description": "Product story block"
+    },
+    "fabric": {
+      "type": "string",
+      "description": "Material information"
+    },
+    "care": {
+      "type": "string",
+      "description": "Care instructions"
+    },
+    "size_chart_url": {
+      "type": "string",
+      "description": "Link to size guide"
+    },
+    "shipping_class": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "express",
+        "international"
+      ]
+    },
+    "seo_title": {
+      "type": "string"
+    },
+    "seo_description": {
+      "type": "string"
+    },
+    "og_image": {
+      "type": "string"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "slug",
+    "price",
+    "status",
+    "collection"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

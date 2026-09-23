@@ -1,0 +1,100 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails involved in the conversation."
+    },
+    "participant_details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "last_message": {
+      "type": "string",
+      "description": "The content of the most recent message for preview."
+    },
+    "last_message_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last message."
+    },
+    "unread_counts": {
+      "type": "object",
+      "description": "Keeps track of unread messages for each participant. e.g. {'user@email.com': 2}"
+    }
+  },
+  "required": [
+    "participants",
+    "participant_details"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.participants": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.participants": {
+        "$in": [
+          "{{user.email}}"
+        ]
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "data.participants": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.participants": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

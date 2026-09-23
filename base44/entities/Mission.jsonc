@@ -1,0 +1,73 @@
+{
+  "name": "Mission",
+  "type": "object",
+  "description": "Shared mission catalog for SKRTLIFE WORLD (platform-defined, not per-user).",
+  "properties": {
+    "mission_id": {
+      "type": "string",
+      "description": "Unique slug e.g. 'go_to_store'"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "mission_type": {
+      "type": "string",
+      "enum": [
+        "travel",
+        "collect",
+        "social",
+        "delivery",
+        "exploration"
+      ],
+      "default": "travel"
+    },
+    "reward_skrt": {
+      "type": "number",
+      "default": 0
+    },
+    "reward_xp": {
+      "type": "number",
+      "default": 0
+    },
+    "required_level": {
+      "type": "integer",
+      "default": 1
+    },
+    "world": {
+      "type": "string",
+      "default": "block_001"
+    },
+    "order_index": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "mission_id",
+    "title",
+    "mission_type",
+    "reward_skrt",
+    "reward_xp"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

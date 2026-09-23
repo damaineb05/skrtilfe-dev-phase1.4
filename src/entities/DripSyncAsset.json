@@ -1,0 +1,79 @@
+{
+  "name": "DripSyncAsset",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who owns this asset"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["avatar", "look"],
+      "description": "Asset type: avatar saves just the model, look saves full outfit"
+    },
+    "name": {
+      "type": "string",
+      "description": "User-friendly name for the asset"
+    },
+    "avatarUrl": {
+      "type": "string",
+      "description": "RPM avatar URL or GLB model URL"
+    },
+    "avatarId": {
+      "type": "string",
+      "description": "RPM avatar ID if available"
+    },
+    "thumbnailUrl": {
+      "type": "string",
+      "description": "Screenshot/thumbnail of the asset"
+    },
+    "isDefault": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a saved default avatar"
+    },
+    "isStarter": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the user's starter avatar"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "customization": {
+          "type": "object",
+          "description": "Avatar appearance customization"
+        },
+        "wearables": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Equipped wearables"
+        },
+        "animations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Custom animations"
+        },
+        "environment": {
+          "type": "object",
+          "description": "Scene/environment config"
+        },
+        "currentRealm": {
+          "type": "object",
+          "description": "Realm config"
+        }
+      },
+      "description": "Complete asset metadata"
+    }
+  },
+  "required": [
+    "user_id",
+    "type",
+    "name",
+    "avatarUrl"
+  ]
+}

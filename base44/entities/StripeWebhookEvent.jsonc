@@ -1,0 +1,62 @@
+{
+  "name": "StripeWebhookEvent",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Stripe event ID (evt_...) \u2014 primary idempotency key"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Stripe event type, e.g. checkout.session.completed"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Stripe checkout session ID if applicable"
+    },
+    "payment_intent_id": {
+      "type": "string",
+      "description": "Stripe payment intent ID if applicable"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "processed",
+        "failed",
+        "skipped"
+      ],
+      "default": "processed"
+    },
+    "processed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "name": "Ticket",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "ID of the event this ticket is for"
+    },
+    "user_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the ticket holder"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Associated order ID"
+    },
+    "ticket_number": {
+      "type": "string",
+      "description": "Unique ticket identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "valid",
+        "used",
+        "cancelled",
+        "refunded"
+      ],
+      "default": "valid"
+    },
+    "price_paid": {
+      "type": "number",
+      "description": "Amount paid for this ticket"
+    },
+    "checked_in_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the ticket was checked in"
+    },
+    "qr_code": {
+      "type": "string",
+      "description": "QR code data for check-in"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional ticket data"
+    }
+  },
+  "required": [
+    "event_id",
+    "user_email",
+    "ticket_number"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

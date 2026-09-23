@@ -1,0 +1,189 @@
+{
+  "name": "Look",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who owns this look"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the look"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of the look"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Screenshot/thumbnail of the look"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "RPM avatar URL"
+    },
+    "avatar_id": {
+      "type": "string",
+      "description": "RPM avatar ID"
+    },
+    "traits": {
+      "type": "object",
+      "properties": {
+        "bodyType": {
+          "type": "string"
+        },
+        "outfitGender": {
+          "type": "string"
+        },
+        "skinTone": {
+          "type": "string"
+        },
+        "hairColor": {
+          "type": "string"
+        },
+        "eyeColor": {
+          "type": "string"
+        }
+      },
+      "description": "Avatar traits"
+    },
+    "customization": {
+      "type": "object",
+      "description": "Avatar customization settings"
+    },
+    "wearables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "bone": {
+            "type": "string"
+          },
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "rotation": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "scale": {
+            "type": "number"
+          }
+        }
+      },
+      "description": "Attached wearables"
+    },
+    "emotes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Custom animations/emotes"
+    },
+    "environment": {
+      "type": "object",
+      "description": "Saved environment/scene config"
+    },
+    "current_realm": {
+      "type": "object",
+      "description": "Saved realm config"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier for sharing"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this look can be viewed by others"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for categorizing looks"
+    }
+  },
+  "required": [
+    "name",
+    "avatar_url"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.is_public": true
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "created_by_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "name": "Realm",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the realm/environment"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the realm"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Preview thumbnail"
+    },
+    "environment_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the 3D environment file (.glb)"
+    },
+    "environment_type": {
+      "type": "string",
+      "enum": [
+        "indoor",
+        "outdoor",
+        "abstract",
+        "studio"
+      ],
+      "default": "studio"
+    },
+    "skybox_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Skybox/HDRI environment map"
+    },
+    "ambient_light": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "default": "#ffffff"
+        },
+        "intensity": {
+          "type": "number",
+          "default": 0.5
+        }
+      }
+    },
+    "directional_lights": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "intensity": {
+            "type": "number"
+          },
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "collision_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether avatars collide with environment"
+    },
+    "ground_level": {
+      "type": "number",
+      "default": 0,
+      "description": "Y position of the ground plane"
+    },
+    "spawn_points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "rotation": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "max_avatars": {
+      "type": "integer",
+      "default": 50,
+      "description": "Maximum avatars in realm"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "creator_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "slug"
+  ]
+}

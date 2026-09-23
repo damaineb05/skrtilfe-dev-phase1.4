@@ -1,0 +1,92 @@
+{
+  "name": "UserDashboardConfig",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the user"
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique widget identifier (e.g., 'my-events', 'my-orders')"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the widget is shown"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Position in the dashboard grid"
+          },
+          "size": {
+            "type": "string",
+            "enum": [
+              "small",
+              "medium",
+              "large"
+            ],
+            "default": "medium",
+            "description": "Widget display size"
+          }
+        },
+        "required": [
+          "id",
+          "enabled",
+          "order"
+        ]
+      },
+      "description": "List of dashboard widgets with their configuration"
+    }
+  },
+  "required": [
+    "user_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Newsletter",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Subscriber email"
+    },
+    "signup_source": {
+      "type": "string",
+      "enum": [
+        "homepage",
+        "genesis",
+        "community",
+        "product"
+      ],
+      "description": "Where they signed up from"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "drops",
+          "genesis",
+          "avatars",
+          "events",
+          "community"
+        ]
+      }
+    },
+    "is_genesis_interested": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "email"
+  ]
+}

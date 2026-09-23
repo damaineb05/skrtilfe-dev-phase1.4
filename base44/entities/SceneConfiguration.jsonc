@@ -1,0 +1,116 @@
+{
+  "name": "SceneConfiguration",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the scene configuration"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the scene"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Preview thumbnail"
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "backgroundColor": {
+          "type": "string",
+          "default": "#1a1a1a"
+        },
+        "ambientLightColor": {
+          "type": "string",
+          "default": "#ffffff"
+        },
+        "ambientLightIntensity": {
+          "type": "number",
+          "default": 0.5
+        },
+        "directionalLights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "intensity": {
+                "type": "number"
+              },
+              "position": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "fogEnabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "fogColor": {
+          "type": "string"
+        },
+        "fogDensity": {
+          "type": "number"
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            0,
+            2,
+            5
+          ]
+        },
+        "target": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "fov": {
+          "type": "number",
+          "default": 50
+        }
+      }
+    },
+    "object_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "IDs of SceneObject entities in this scene"
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

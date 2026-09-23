@@ -1,0 +1,51 @@
+{
+  "name": "DefaultAvatar",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The ID of the user who owns this avatar"
+    },
+    "name": {
+      "type": "string",
+      "description": "Avatar display name"
+    },
+    "avatarUrl": {
+      "type": "string",
+      "description": "URL to the 3D avatar model (GLB/GLTF)"
+    },
+    "thumbnailUrl": {
+      "type": "string",
+      "description": "Optional preview/thumbnail image URL"
+    },
+    "avatarId": {
+      "type": "string",
+      "description": "RPM avatar ID if applicable"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["rpm", "sketchfab", "uploaded", "default"],
+      "default": "uploaded",
+      "description": "Source of the avatar"
+    },
+    "assetType": {
+      "type": "string",
+      "default": "avatar",
+      "description": "Asset type identifier"
+    },
+    "isDefaultAvatar": {
+      "type": "boolean",
+      "default": true
+    },
+    "isStarterAvatar": {
+      "type": "boolean",
+      "default": false,
+      "description": "If true, this avatar is auto-loaded when DripSync opens"
+    },
+    "metadataJson": {
+      "type": "object",
+      "description": "Saved state: customization, wearables, environment, currentRealm"
+    }
+  },
+  "required": ["name", "avatarUrl"]
+}

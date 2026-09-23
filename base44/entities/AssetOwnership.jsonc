@@ -1,0 +1,108 @@
+{
+  "name": "AssetOwnership",
+  "type": "object",
+  "description": "The critical ownership layer \u2014 separates the asset from who owns it. Powers DripSync closet, wallet syncing, and ownership verification. Authoritative ownership ledger: User -> AssetOwnership -> Wearable. Equipped state lives in User.avatar_config.equipped, NOT here.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the owning User"
+    },
+    "wearable_id": {
+      "type": "string",
+      "description": "Reference to the Wearable asset"
+    },
+    "token_id": {
+      "type": "string",
+      "description": "On-chain token ID (if NFT)"
+    },
+    "contract_address": {
+      "type": "string",
+      "description": "Blockchain contract address (if NFT)"
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1,
+      "description": "Number of copies owned (ERC-1155 support)"
+    },
+    "acquired_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When ownership was acquired"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "mint",
+        "purchase",
+        "airdrop",
+        "transfer",
+        "gift"
+      ],
+      "description": "How this asset was acquired"
+    },
+    "source_order_id": {
+      "type": "string",
+      "description": "Order record that granted this ownership. Idempotency key: a duplicate Stripe webhook delivering the same order must NOT create a second ownership record. Query existing ownership by (user_id, wearable_id, source_order_id) before inserting."
+    },
+    "source_sku": {
+      "type": "string",
+      "description": "Product variant SKU that granted this ownership"
+    },
+    "is_equipped": {
+      "type": "boolean",
+      "default": false,
+      "description": "LEGACY equipped flag \u2014 no longer authoritative. Canonical equipped state is User.avatar_config.equipped. Retained for backward compat with older closet reads; do not build new sync logic against it."
+    },
+    "last_worn_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this specific owned item was worn"
+    },
+    "wear_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "How many times this owned item has been worn"
+    }
+  },
+  "required": [
+    "user_id",
+    "wearable_id",
+    "source"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

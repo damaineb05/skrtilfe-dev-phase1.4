@@ -1,0 +1,144 @@
+{
+  "name": "Order",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the customer"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Authenticated SKRTLIFE user id of the purchaser (resolved from session.metadata.user_id by the webhook). The ownership key for AssetOwnership grants."
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "variant_sku": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "product_id",
+          "title",
+          "quantity",
+          "price"
+        ]
+      }
+    },
+    "total_amount": {
+      "type": "number"
+    },
+    "shipping_address": {
+      "type": "object"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "paypal",
+        "crypto",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "payment_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "paid",
+        "failed",
+        "exception",
+        "refunded"
+      ],
+      "default": "pending"
+    },
+    "transaction_id": {
+      "type": "string",
+      "description": "Reference ID from the payment provider"
+    },
+    "checkout_session_id": {
+      "type": "string",
+      "description": "Stripe Checkout Session ID (cs_...)"
+    },
+    "payment_intent_id": {
+      "type": "string",
+      "description": "Stripe Payment Intent ID (pi_...)"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Timestamped gateway/webhook logs"
+    },
+    "fulfillment_status": {
+      "type": "string",
+      "enum": [
+        "unfulfilled",
+        "fulfilled",
+        "partially_fulfilled"
+      ],
+      "default": "unfulfilled"
+    },
+    "tracking_number": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "user_email",
+    "line_items",
+    "total_amount"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

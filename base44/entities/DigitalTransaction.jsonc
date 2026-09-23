@@ -1,0 +1,107 @@
+{
+  "name": "DigitalTransaction",
+  "type": "object",
+  "description": "Records all marketplace transactions \u2014 Web2 and Web3 hybrid.",
+  "properties": {
+    "buyer_id": {
+      "type": "string",
+      "description": "Reference to the buying User"
+    },
+    "seller_id": {
+      "type": "string",
+      "description": "Reference to the selling User"
+    },
+    "listing_id": {
+      "type": "string",
+      "description": "Reference to the Listing"
+    },
+    "wearable_id": {
+      "type": "string",
+      "description": "Reference to the Wearable transferred"
+    },
+    "price": {
+      "type": "number",
+      "description": "Final transaction price"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "ETH",
+        "USDC",
+        "USD"
+      ],
+      "default": "USD"
+    },
+    "platform_fee": {
+      "type": "number",
+      "description": "Platform fee taken on this transaction"
+    },
+    "creator_royalty": {
+      "type": "number",
+      "description": "Royalty paid to original creator"
+    },
+    "tx_hash": {
+      "type": "string",
+      "description": "On-chain transaction hash (if Web3)"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "stripe",
+        "crypto",
+        "usdc",
+        "eth"
+      ],
+      "description": "Payment method used"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "completed",
+        "failed",
+        "refunded"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "buyer_id",
+    "wearable_id",
+    "price",
+    "currency",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.buyer_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

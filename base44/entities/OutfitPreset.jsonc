@@ -1,0 +1,160 @@
+{
+  "name": "OutfitPreset",
+  "type": "object",
+  "description": "Saved outfit presets \u2014 allows users to save and quick-switch between full looks.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the owning User"
+    },
+    "avatar_id": {
+      "type": "string",
+      "description": "Reference to the Avatar this preset belongs to"
+    },
+    "name": {
+      "type": "string",
+      "description": "User-defined preset name e.g. 'Street Fit', 'Genesis Look'"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Screenshot/thumbnail of the outfit"
+    },
+    "slots": {
+      "type": "object",
+      "description": "Full slot map \u2014 wearable_id per slot",
+      "properties": {
+        "head": {
+          "type": "string"
+        },
+        "torso": {
+          "type": "string"
+        },
+        "legs": {
+          "type": "string"
+        },
+        "feet": {
+          "type": "string"
+        },
+        "accessory": {
+          "type": "string"
+        },
+        "eyewear": {
+          "type": "string"
+        },
+        "bag": {
+          "type": "string"
+        },
+        "full_body": {
+          "type": "string"
+        }
+      }
+    },
+    "wearables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "wearable_id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "transform": {
+            "type": "object",
+            "properties": {
+              "position": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "rotation": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "scale": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      },
+      "description": "Full wearable list with transforms for bulk equip"
+    },
+    "drip_score": {
+      "type": "number",
+      "description": "Calculated outfit score based on rarity, combo bonuses etc."
+    },
+    "is_public": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this preset is visible to the community"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "like_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "last_worn_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "user_id",
+    "avatar_id",
+    "name",
+    "slots"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.is_public": true
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

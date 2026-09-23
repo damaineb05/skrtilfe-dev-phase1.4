@@ -1,0 +1,118 @@
+{
+  "name": "NFT",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the NFT"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the NFT"
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL to the NFT image"
+    },
+    "collection_name": {
+      "type": "string",
+      "description": "Name of the collection this NFT belongs to"
+    },
+    "contract_address": {
+      "type": "string",
+      "description": "Blockchain contract address"
+    },
+    "token_id": {
+      "type": "string",
+      "description": "Token ID on the blockchain"
+    },
+    "price": {
+      "type": "number",
+      "description": "Current price of the NFT"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "ETH",
+        "USDC",
+        "MATIC"
+      ],
+      "default": "ETH",
+      "description": "Currency for pricing"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "listed",
+        "not_listed",
+        "sold"
+      ],
+      "default": "not_listed",
+      "description": "Current listing status"
+    },
+    "rarity_rank": {
+      "type": "number",
+      "description": "Rarity ranking within collection"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this NFT is featured"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "utility",
+        "fashion",
+        "art",
+        "collectible"
+      ],
+      "default": "collectible",
+      "description": "Category of the NFT"
+    },
+    "favorite_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Number of users who favorited this NFT"
+    },
+    "last_sale_price": {
+      "type": "number",
+      "description": "Price of the last sale"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags associated with the NFT"
+    },
+    "metadata_uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI to metadata JSON"
+    }
+  },
+  "required": [
+    "name",
+    "image_url"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

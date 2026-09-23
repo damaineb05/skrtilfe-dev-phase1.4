@@ -1,0 +1,63 @@
+{
+  "name": "Drop",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "collection_id": {
+      "type": "string"
+    },
+    "start_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "upcoming",
+        "live",
+        "ended"
+      ],
+      "default": "upcoming"
+    },
+    "has_allowlist": {
+      "type": "boolean",
+      "default": false
+    },
+    "description": {
+      "type": "string"
+    },
+    "hero_image_url": {
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "required": [
+    "title",
+    "collection_id",
+    "start_at"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

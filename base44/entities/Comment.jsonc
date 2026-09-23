@@ -1,0 +1,63 @@
+{
+  "name": "Comment",
+  "type": "object",
+  "properties": {
+    "post_id": {
+      "type": "string",
+      "description": "ID of the post this comment belongs to"
+    },
+    "user_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email of the commenter"
+    },
+    "content": {
+      "type": "string",
+      "description": "Comment text content"
+    },
+    "likes_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of likes on this comment"
+    },
+    "parent_comment_id": {
+      "type": "string",
+      "description": "ID of parent comment if this is a reply"
+    }
+  },
+  "required": [
+    "post_id",
+    "user_email",
+    "content"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.user_email": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

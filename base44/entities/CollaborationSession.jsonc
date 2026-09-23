@@ -1,0 +1,154 @@
+{
+  "name": "CollaborationSession",
+  "type": "object",
+  "properties": {
+    "session_name": {
+      "type": "string",
+      "description": "Name of the collaboration session"
+    },
+    "session_code": {
+      "type": "string",
+      "description": "Unique code for joining the session"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Email of the session creator"
+    },
+    "scene_id": {
+      "type": "string",
+      "description": "ID of the scene configuration being edited"
+    },
+    "active_users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "last_active": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cursor_position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            }
+          },
+          "selected_object_id": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Currently active users in the session"
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "public": {
+          "type": "boolean",
+          "default": false
+        },
+        "allowed_users": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "edit_mode": {
+          "type": "string",
+          "enum": [
+            "free",
+            "locked",
+            "turn_based"
+          ],
+          "default": "free"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "ended"
+      ],
+      "default": "active"
+    },
+    "scene_state": {
+      "type": "object",
+      "description": "Current state of the scene with all objects"
+    },
+    "last_modified": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "session_name",
+    "session_code",
+    "owner_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.permissions.public": true
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.permissions.allowed_users": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.owner_email": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "The ID of the conversation this message belongs to."
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "The email of the user who sent the message."
+    },
+    "content": {
+      "type": "string",
+      "description": "The text content of the message."
+    },
+    "media_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for any attached media (image, etc.)."
+    }
+  },
+  "required": [
+    "conversation_id",
+    "sender_email",
+    "content"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.sender_email": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "name": "Listing",
+  "type": "object",
+  "description": "Marketplace listing entity \u2014 connects sellers, wearables, and buyers.",
+  "properties": {
+    "seller_id": {
+      "type": "string",
+      "description": "Reference to the selling User"
+    },
+    "wearable_id": {
+      "type": "string",
+      "description": "Reference to the Wearable being listed"
+    },
+    "ownership_id": {
+      "type": "string",
+      "description": "Reference to the AssetOwnership record being sold"
+    },
+    "title": {
+      "type": "string",
+      "description": "Listing title (can differ from wearable name)"
+    },
+    "price": {
+      "type": "number",
+      "description": "Asking price"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "ETH",
+        "USDC",
+        "USD"
+      ],
+      "default": "USD"
+    },
+    "quantity": {
+      "type": "integer",
+      "default": 1,
+      "description": "Number of copies being listed"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "sold",
+        "cancelled",
+        "expired"
+      ],
+      "default": "active"
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Featured placement in marketplace"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this listing expires"
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "like_count": {
+      "type": "integer",
+      "default": 0
+    }
+  },
+  "required": [
+    "seller_id",
+    "wearable_id",
+    "price",
+    "currency"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.seller_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.seller_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.seller_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

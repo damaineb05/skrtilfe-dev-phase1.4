@@ -1,0 +1,117 @@
+{
+  "name": "Avatar",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the owning User"
+    },
+    "model_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "CDN URL to the .glb avatar model"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Preloaded thumbnail image for fast rendering"
+    },
+    "rig_type": {
+      "type": "string",
+      "enum": [
+        "humanoid",
+        "custom"
+      ],
+      "default": "humanoid",
+      "description": "Skeleton rig type for wearable compatibility"
+    },
+    "traits": {
+      "type": "object",
+      "description": "Flexible JSON for hair, face, skin, eye traits etc.",
+      "properties": {
+        "hairColor": {
+          "type": "string"
+        },
+        "eyeColor": {
+          "type": "string"
+        },
+        "skinTone": {
+          "type": "string"
+        },
+        "hairStyle": {
+          "type": "string"
+        },
+        "bodyType": {
+          "type": "string"
+        }
+      }
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this is the user's currently active avatar"
+    },
+    "wear_count": {
+      "type": "integer",
+      "default": 0,
+      "description": "Usage tracking \u2014 future dynamic NFT signal"
+    },
+    "last_worn_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last time this avatar was equipped"
+    },
+    "export_formats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Supported export formats e.g. ['vrm', 'fbx', 'glb']"
+    }
+  },
+  "required": [
+    "user_id",
+    "model_url"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "data.user_id": "{{user.id}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

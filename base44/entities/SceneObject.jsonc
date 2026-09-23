@@ -1,0 +1,115 @@
+{
+  "name": "SceneObject",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the scene object"
+    },
+    "object_type": {
+      "type": "string",
+      "enum": [
+        "mesh",
+        "light",
+        "camera",
+        "group"
+      ],
+      "default": "mesh",
+      "description": "Type of object in the scene"
+    },
+    "asset_url": {
+      "type": "string",
+      "description": "URL to the 3D model file (if mesh)"
+    },
+    "position": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "description": "X, Y, Z position"
+    },
+    "rotation": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "description": "X, Y, Z rotation in radians"
+    },
+    "scale": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "default": [
+        1,
+        1,
+        1
+      ],
+      "description": "X, Y, Z scale"
+    },
+    "material_config": {
+      "type": "object",
+      "properties": {
+        "baseColor": {
+          "type": "string"
+        },
+        "metalness": {
+          "type": "number"
+        },
+        "roughness": {
+          "type": "number"
+        },
+        "emissive": {
+          "type": "string"
+        },
+        "emissiveIntensity": {
+          "type": "number"
+        },
+        "textureUrl": {
+          "type": "string"
+        },
+        "normalMapUrl": {
+          "type": "string"
+        },
+        "roughnessMapUrl": {
+          "type": "string"
+        },
+        "metallicMapUrl": {
+          "type": "string"
+        }
+      },
+      "description": "Material properties for the object"
+    },
+    "scene_id": {
+      "type": "string",
+      "description": "ID of the scene configuration this belongs to"
+    },
+    "is_visible": {
+      "type": "boolean",
+      "default": true
+    },
+    "is_locked": {
+      "type": "boolean",
+      "default": false,
+      "description": "Prevent accidental modifications"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional object metadata"
+    }
+  },
+  "required": [
+    "name",
+    "object_type"
+  ]
+}

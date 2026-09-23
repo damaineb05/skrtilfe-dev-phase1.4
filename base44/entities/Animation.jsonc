@@ -1,0 +1,81 @@
+{
+  "name": "Animation",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "Unique, URL-friendly identifier for the animation"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title for the animation"
+    },
+    "gender": {
+      "type": "string",
+      "enum": [
+        "F",
+        "M",
+        "U"
+      ],
+      "description": "Target gender for the animation rig"
+    },
+    "gait": {
+      "type": "string",
+      "enum": [
+        "idle",
+        "walk",
+        "jog",
+        "run",
+        "crouch_walk",
+        "crouch_strafe",
+        "jump",
+        "falling_idle",
+        "other"
+      ],
+      "description": "The type of movement or action"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "none",
+        "forward",
+        "backward",
+        "strafe_left",
+        "strafe_right",
+        "left",
+        "right"
+      ],
+      "default": "none",
+      "description": "The direction of the locomotion"
+    },
+    "durationMs": {
+      "type": "integer",
+      "description": "Duration of the animation in milliseconds"
+    },
+    "sourceUrl": {
+      "type": "string",
+      "description": "The public URL to the .glb or .fbx animation file"
+    },
+    "fileSha256": {
+      "type": "string",
+      "description": "SHA256 hash of the file for integrity checking"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for searching and filtering"
+    }
+  },
+  "required": [
+    "slug",
+    "title",
+    "gender",
+    "gait",
+    "sourceUrl",
+    "fileSha256",
+    "durationMs"
+  ]
+}

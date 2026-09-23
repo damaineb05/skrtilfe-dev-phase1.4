@@ -1,0 +1,103 @@
+{
+  "name": "AuditLog",
+  "type": "object",
+  "properties": {
+    "actor_email": {
+      "type": "string",
+      "description": "Email of user who performed action"
+    },
+    "actor_role": {
+      "type": "string",
+      "description": "Role of the actor at time of action"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "delete",
+        "read",
+        "login",
+        "logout",
+        "permission_change",
+        "payment",
+        "refund",
+        "mint",
+        "transfer",
+        "entitlement_grant",
+        "entitlement_revoke",
+        "dispute"
+      ],
+      "description": "Type of action performed"
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "Type of entity affected (Product, Order, NFT, User, etc.)"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID of the affected entity"
+    },
+    "before_state": {
+      "type": "object",
+      "description": "Entity state before action (for updates/deletes)"
+    },
+    "after_state": {
+      "type": "object",
+      "description": "Entity state after action (for creates/updates)"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "IP address of the actor"
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "User agent string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "unauthorized"
+      ],
+      "default": "success",
+      "description": "Result of the action"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if action failed"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional context (tx_hash, chain_id, stripe_event_id, entitlement summary, etc.)"
+    }
+  },
+  "required": [
+    "actor_email",
+    "action",
+    "entity_type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

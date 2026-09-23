@@ -1,0 +1,129 @@
+{
+  "name": "Transaction",
+  "type": "object",
+  "properties": {
+    "tx_hash": {
+      "type": "string",
+      "description": "Blockchain transaction hash"
+    },
+    "chain_id": {
+      "type": "integer",
+      "description": "Chain ID where transaction occurred"
+    },
+    "from_address": {
+      "type": "string",
+      "description": "Sender wallet address"
+    },
+    "to_address": {
+      "type": "string",
+      "description": "Recipient wallet address"
+    },
+    "amount": {
+      "type": "string",
+      "description": "Transaction amount (in token units)"
+    },
+    "currency": {
+      "type": "string",
+      "enum": [
+        "ETH",
+        "USDC",
+        "MATIC"
+      ],
+      "default": "USDC",
+      "description": "Currency/token used"
+    },
+    "tx_type": {
+      "type": "string",
+      "enum": [
+        "payment",
+        "mint",
+        "transfer",
+        "listing",
+        "sale",
+        "bid"
+      ],
+      "description": "Type of transaction"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "confirmed",
+        "failed",
+        "reverted"
+      ],
+      "default": "pending",
+      "description": "Transaction status"
+    },
+    "block_number": {
+      "type": "integer",
+      "description": "Block number when confirmed"
+    },
+    "gas_used": {
+      "type": "string",
+      "description": "Gas used for transaction"
+    },
+    "gas_price": {
+      "type": "string",
+      "description": "Gas price in gwei"
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Related order ID if payment transaction"
+    },
+    "nft_id": {
+      "type": "string",
+      "description": "Related NFT ID if mint/transfer"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "User email who initiated transaction"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if transaction failed"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional transaction metadata"
+    }
+  },
+  "required": [
+    "tx_hash",
+    "chain_id",
+    "from_address",
+    "to_address",
+    "amount",
+    "currency",
+    "tx_type"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

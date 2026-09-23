@@ -1,0 +1,131 @@
+{
+  "name": "GenesisPass",
+  "type": "object",
+  "description": "Genesis NFT Pass \u2014 gates premium features, exclusive drops, and platform perks.",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Reference to the pass holder User"
+    },
+    "token_id": {
+      "type": "string",
+      "description": "On-chain NFT token ID"
+    },
+    "contract_address": {
+      "type": "string",
+      "description": "Smart contract address"
+    },
+    "tier": {
+      "type": "string",
+      "enum": [
+        "genesis_888"
+      ],
+      "default": "genesis_888",
+      "description": "Pass tier \u2014 genesis_888 is the founding collection"
+    },
+    "pass_number": {
+      "type": "integer",
+      "description": "Pass number out of 888 (e.g. #42 of 888)"
+    },
+    "perks": {
+      "type": "object",
+      "description": "JSON map of unlocked perks",
+      "properties": {
+        "exclusive_drops": {
+          "type": "boolean",
+          "default": true
+        },
+        "discount_percentage": {
+          "type": "number",
+          "default": 20
+        },
+        "avatar_slots": {
+          "type": "integer",
+          "default": 5
+        },
+        "creator_access": {
+          "type": "boolean",
+          "default": true
+        },
+        "physical_hoodie": {
+          "type": "boolean",
+          "default": true
+        },
+        "early_access": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "mint_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this pass was minted"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiry date (null = lifetime)"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this pass is currently valid"
+    },
+    "transfer_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "tx_hash": {
+            "type": "string"
+          },
+          "transferred_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "description": "History of ownership transfers"
+    }
+  },
+  "required": [
+    "user_id",
+    "tier"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

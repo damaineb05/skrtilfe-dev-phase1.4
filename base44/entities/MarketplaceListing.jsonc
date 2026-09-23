@@ -1,0 +1,131 @@
+{
+  "name": "MarketplaceListing",
+  "type": "object",
+  "properties": {
+    "seller_email": {
+      "type": "string",
+      "description": "Email of the seller"
+    },
+    "title": {
+      "type": "string",
+      "description": "Listing title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Listing description"
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "wearable",
+        "environment",
+        "emote",
+        "bundle"
+      ],
+      "description": "Type of asset being sold"
+    },
+    "asset_url": {
+      "type": "string",
+      "description": "URL to the asset file"
+    },
+    "thumbnail_url": {
+      "type": "string",
+      "description": "Preview image URL"
+    },
+    "price": {
+      "type": "number",
+      "description": "Price in DripCoins"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "headwear",
+        "top",
+        "bottom",
+        "footwear",
+        "accessory",
+        "full_outfit",
+        "environment",
+        "animation",
+        "effect"
+      ],
+      "description": "Asset category"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Searchable tags"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "sold",
+        "delisted"
+      ],
+      "default": "active"
+    },
+    "rarity": {
+      "type": "string",
+      "enum": [
+        "common",
+        "uncommon",
+        "rare",
+        "epic",
+        "legendary"
+      ],
+      "default": "common"
+    },
+    "views": {
+      "type": "integer",
+      "default": 0
+    },
+    "favorites": {
+      "type": "integer",
+      "default": 0
+    },
+    "asset_metadata": {
+      "type": "object",
+      "description": "Additional asset data like bone, position, scale"
+    }
+  },
+  "required": [
+    "seller_email",
+    "title",
+    "asset_type",
+    "asset_url",
+    "price"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "data.seller_email": "{{user.email}}"
+    },
+    "update": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.seller_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}
