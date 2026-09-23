@@ -9,17 +9,38 @@
     "balance": {
       "type": "number",
       "default": 100,
-      "description": "Current balance in DripCoins"
+      "description": "Current balance in DripCoins",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "lifetime_earned": {
       "type": "number",
       "default": 0,
-      "description": "Total coins earned over time"
+      "description": "Total coins earned over time",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "lifetime_spent": {
       "type": "number",
       "default": 0,
-      "description": "Total coins spent over time"
+      "description": "Total coins spent over time",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     }
   },
   "required": [

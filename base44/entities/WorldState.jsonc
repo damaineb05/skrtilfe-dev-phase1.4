@@ -47,7 +47,14 @@
       "items": {
         "type": "string"
       },
-      "default": []
+      "default": [],
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "last_saved_at": {
       "type": "string",

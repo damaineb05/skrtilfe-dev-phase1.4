@@ -1,9 +1,9 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14';
 
-const stripeClient = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
-
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   console.log('=== Genesis Checkout Started ===');
   try {
     const base44 = createClientFromRequest(req);
@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
       quantity: 1
     };
 
+    const stripeClient = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
     const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [lineItem],
@@ -72,7 +73,9 @@ Deno.serve(async (req) => {
     console.log('Genesis checkout session created:', session.id);
     return Response.json({ url: session.url });
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('Genesis checkout error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

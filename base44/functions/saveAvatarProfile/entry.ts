@@ -1,3 +1,4 @@
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
 
 /**
@@ -25,14 +26,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
  * the ownership LEDGER remains the source of truth for entitlements/progression.
  */
 
-import { normalizeAvatarConfig } from '../../shared/avatarConfigServer.js';
+import { validateAvatarConfig } from '../../shared/avatarValidation.js';
 
 // Canonical avatar sanitization (normalizeAvatarConfig + helpers) now lives
 // in base44/shared/avatarConfigServer.js, shared with saveDefaultAvatar. The
 // inline duplicate was removed in Phase E to centralize server-side avatar
 // normalization and avoid three-way duplication.
 
-export default async function(req) {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -42,7 +43,8 @@ export default async function(req) {
     if (!body) return Response.json({ error: 'Invalid request body' }, { status: 400 });
 
     // ── 1. Normalize incoming config → canonical v2 ──────────────────────
-    const desired = normalizeAvatarConfig(body.avatar_config || body);
+    let desired;
+    try { desired = validateAvatarConfig(body.avatar_config || body); } catch (error) { return Response.json({ error: error.message }, { status: 400 }); }
     if (!desired) return Response.json({ error: 'Invalid avatar config' }, { status: 400 });
 
     // ── 2. Collect catalog wearable_ids that need ownership verification ──
@@ -54,7 +56,7 @@ export default async function(req) {
     if (catalogSet.size === 0) {
       // No catalog entitlements to verify — persist directly.
       desired.updated_at = new Date().toISOString();
-      await base44.auth.updateMe({ avatar_config: desired });
+      await base44.asServiceRole.entities.User.update(user.id, { avatar_config: desired });
       return Response.json({ success: true, avatar_config: desired });
     }
 
@@ -92,10 +94,10 @@ export default async function(req) {
 
     // ── 5. Persist the sanitized canonical v2 config ────────────────────
     desired.updated_at = new Date().toISOString();
-    await base44.auth.updateMe({ avatar_config: desired });
+    await base44.asServiceRole.entities.User.update(user.id, { avatar_config: desired });
     return Response.json({ success: true, avatar_config: desired });
   } catch (error) {
     console.error('[saveAvatarProfile] error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-}
+}));

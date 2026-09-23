@@ -1,3 +1,5 @@
+import { assertAssetUrl } from '../../shared/apiContract.js';
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import { buildCanonicalFromAvatarUrl } from '../../shared/avatarConfigServer.js';
 
@@ -20,7 +22,7 @@ import { buildCanonicalFromAvatarUrl } from '../../shared/avatarConfigServer.js'
  * set the user already had. This is safe: equipping was already validated when
  * those items were equipped via saveAvatarProfile.
  */
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -31,6 +33,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Avatar URL is required' }, { status: 400 });
     }
 
+    try { assertAssetUrl(avatarUrl); } catch (error) { return Response.json({ error: error.message }, { status: 400 }); }
+    if (gender && !['feminine','masculine','neutral'].includes(gender)) return Response.json({error:'Invalid gender'}, {status:400});
     // Build canonical v2 from the bare URL, preserving existing config state.
     const canonical = buildCanonicalFromAvatarUrl(avatarUrl, {
       existingConfig: user.avatar_config,
@@ -38,11 +42,11 @@ Deno.serve(async (req) => {
     });
     if (!canonical) return Response.json({ error: 'Invalid avatar URL' }, { status: 400 });
 
-    await base44.auth.updateMe({ avatar_config: canonical });
+    await base44.asServiceRole.entities.User.update(user.id, { avatar_config: canonical });
 
     return Response.json({ success: true, avatar_config: canonical });
   } catch (error) {
     console.error('saveDefaultAvatar error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

@@ -1,6 +1,8 @@
+import { validateOrderUpdate } from '../../shared/orderUpdateContract.js';
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -20,11 +22,15 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Order ID is required' }, { status: 400 });
     }
 
+    let patch;
+    try { patch = validateOrderUpdate(orderId, updates); } catch (error) { return Response.json({ error: error.message }, { status: 400 }); }
+    const current = await base44.asServiceRole.entities.Order.get(orderId).catch(() => null);
+    if (!current) return Response.json({error:'Order not found'}, {status:404});
     // Update the order
     const updatedOrder = await base44.asServiceRole.entities.Order.update(orderId, {
-      ...updates,
+      ...patch,
       events: [
-        ...(updates.existingEvents || []),
+        ...(current.events || []),
         {
           timestamp: new Date().toISOString(),
           message: `Order updated by admin ${user.email}: ${updates.updateNote || 'status changed'}`
@@ -56,4 +62,4 @@ Deno.serve(async (req) => {
       details: error.message
     }, { status: 500 });
   }
-});
+}));

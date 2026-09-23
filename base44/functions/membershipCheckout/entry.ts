@@ -1,7 +1,7 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import Stripe from 'npm:stripe@14';
-
-const stripeClient = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
 
 // ── Authoritative DripSync+ price (server-side) ───────────────────────────
 // This MUST match the client display config in src/lib/membershipPlans.js
@@ -20,7 +20,7 @@ const DRIPSYNC_PLUS_INTERVAL = 'month';
  * the sole authority that sets user.dripsync_plus_holder on verified payment.
  * No client path grants membership.
  */
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
       quantity: 1,
     };
 
+    const stripeClient = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
     const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [lineItem],
@@ -69,7 +70,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: session.url });
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('membershipCheckout error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

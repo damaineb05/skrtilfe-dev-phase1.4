@@ -1,3 +1,4 @@
+import { contractHandler } from '../../shared/apiContract.js';
 /**
  * colyseusRoom — MULTIPLAYER PLACEHOLDER
  * Colyseus multiplayer is not yet deployed.
@@ -6,9 +7,9 @@
  * Re-enable when a Colyseus server is provisioned.
  */
 
-Deno.serve(async (_req) => {
+Deno.serve(contractHandler(async (_req) => {
   return new Response(
     JSON.stringify({ error: "Multiplayer not yet deployed" }),
     { status: 503, headers: { "Content-Type": "application/json" } }
   );
-});
+}));

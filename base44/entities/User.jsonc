@@ -39,17 +39,26 @@
     "is_admin": {
       "type": "boolean",
       "default": false,
-      "description": "Legacy admin flag, prefer role-based access"
+      "description": "Legacy admin flag, prefer role-based access",
+      "rls": {
+        "write": false
+      }
     },
     "genesis_holder": {
       "type": "boolean",
       "default": false,
-      "description": "Canonical Genesis membership flag. Set SERVER-SIDE by the Stripe webhook on a verified genesis_pass checkout (and by grantGenesisPass). hasGenesisAccess() reads this; admins inherit. Authoritative Genesis entitlement \u2014 never set from the client."
+      "description": "Canonical Genesis membership flag. Set SERVER-SIDE by the Stripe webhook on a verified genesis_pass checkout (and by grantGenesisPass). hasGenesisAccess() reads this; admins inherit. Authoritative Genesis entitlement \u2014 never set from the client.",
+      "rls": {
+        "write": false
+      }
     },
     "dripsync_plus_holder": {
       "type": "boolean",
       "default": false,
-      "description": "Canonical DripSync+ membership flag. Set SERVER-SIDE by the Stripe webhook on a verified dripsync_plus checkout. Authoritative DripSync+ entitlement \u2014 never set from the client. Membership state lives here (profile/account), NEVER on avatar_config."
+      "description": "Canonical DripSync+ membership flag. Set SERVER-SIDE by the Stripe webhook on a verified dripsync_plus checkout. Authoritative DripSync+ entitlement \u2014 never set from the client. Membership state lives here (profile/account), NEVER on avatar_config.",
+      "rls": {
+        "write": false
+      }
     },
     "membership_offer_seen": {
       "type": "boolean",
@@ -126,7 +135,10 @@
         "Not a Member"
       ],
       "default": "Not a Member",
-      "description": "User's Genesis NFT ownership status"
+      "description": "User's Genesis NFT ownership status",
+      "rls": {
+        "write": false
+      }
     },
     "social_connections": {
       "type": "object",
@@ -154,6 +166,10 @@
             "format": "date-time"
           }
         }
+      },
+      "rls": {
+        "write": false,
+        "read": false
       }
     },
     "avatar_config": {
@@ -185,7 +201,8 @@
                 "default",
                 "look",
                 "system",
-                "readyplayerme"
+                "readyplayerme",
+                "streamoji"
               ]
             },
             "gender": {
@@ -297,6 +314,9 @@
           "format": "date-time",
           "description": "Last server-validated save timestamp"
         }
+      },
+      "rls": {
+        "write": false
       }
     },
     "saved_looks": {
@@ -360,6 +380,27 @@
           "format": "date-time"
         }
       }
+    },
+    "id": {
+      "type": "string",
+      "rls": {
+        "write": false
+      },
+      "description": "Provider-controlled identity field; never client assigned."
+    },
+    "email": {
+      "type": "string",
+      "rls": {
+        "write": false
+      },
+      "description": "Provider-controlled identity field; never client assigned."
+    },
+    "role": {
+      "type": "string",
+      "rls": {
+        "write": false
+      },
+      "description": "Provider-controlled identity field; never client assigned."
     }
   },
   "required": []

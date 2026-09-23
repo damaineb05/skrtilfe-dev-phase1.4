@@ -1,22 +1,19 @@
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import Stripe from 'npm:stripe@14.14.0';
-
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
-  apiVersion: '2023-10-16',
-});
-
-const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
 
 Deno.serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
   
-  if (!signature || !webhookSecret) {
-    console.error('❌ Missing signature or webhook secret');
+  if (!signature) {
+    console.error('❌ Missing webhook signature');
     return Response.json({ error: 'Webhook validation failed' }, { status: 400 });
   }
 
   let event;
   try {
+    const stripe = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'), { apiVersion: '2023-10-16' });
+    const webhookSecret = requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_WEBHOOK_SECRET');
     const body = await req.text();
     event = await stripe.webhooks.constructEventAsync(
       body,
@@ -24,6 +21,8 @@ Deno.serve(async (req) => {
       webhookSecret
     );
   } catch (err) {
+    const configurationFailure = configurationErrorResponse(err);
+    if (configurationFailure) return configurationFailure;
     console.error('❌ Webhook signature verification failed:', err.message);
     return Response.json({ error: 'Invalid signature' }, { status: 400 });
   }
@@ -103,6 +102,8 @@ Deno.serve(async (req) => {
     return Response.json({ received: true });
 
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('❌ Webhook processing error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }

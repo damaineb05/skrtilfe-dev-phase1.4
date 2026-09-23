@@ -161,6 +161,33 @@
               },
               "color": {
                 "type": "string"
+              },
+              "wearable_id": {
+                "type": "string",
+                "description": "Explicit Wearable entity identity for catalog equipment; ownership is still validated server-side."
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "catalog",
+                  "upload"
+                ],
+                "description": "Catalog identity or uploaded model; never infer ownership from a model URL."
+              },
+              "fromShop": {
+                "type": "boolean",
+                "default": false,
+                "description": "Legacy try-on preview flag. Preview items are excluded from durable equipment saves."
+              },
+              "isPreview": {
+                "type": "boolean",
+                "default": false,
+                "description": "Runtime-only try-on marker; preserved on legacy reads so previews cannot become equipment."
+              },
+              "isDemo": {
+                "type": "boolean",
+                "default": false,
+                "description": "Demo-only item; excluded from canonical equipment and saved wardrobe assets."
               }
             }
           },

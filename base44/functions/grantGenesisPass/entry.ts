@@ -1,3 +1,4 @@
+import { contractHandler } from '../../shared/apiContract.js';
 /**
  * grantGenesisPass — Creates a GenesisPass record for a user.
  *
@@ -12,7 +13,7 @@
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
@@ -112,4 +113,4 @@ Deno.serve(async (req) => {
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

@@ -55,16 +55,37 @@
         "basic",
         "genesis"
       ],
-      "default": "basic"
+      "default": "basic",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "reputation_score": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "badges": {
       "type": "array",
       "items": {
         "type": "string"
+      },
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
       }
     },
     "shipping_addresses": {
@@ -182,6 +203,13 @@
         "members_only_pricing": {
           "type": "boolean",
           "default": false
+        }
+      },
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
         }
       }
     }

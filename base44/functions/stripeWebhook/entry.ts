@@ -1,66 +1,48 @@
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14';
-
-const stripeClient = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
+import { recoverCheckout, requireSuccessfulGrant } from '../../shared/checkoutRecovery.js';
 
 Deno.serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
   const body = await req.text();
 
+  let signatureVerified = false;
   try {
+    const stripeClient = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
+    const webhookSecret = requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_WEBHOOK_SECRET');
     // Verify webhook signature
     const event = await stripeClient.webhooks.constructEventAsync(
       body,
       signature,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET')
+      webhookSecret
     );
 
+    signatureVerified = true;
     const base44 = createClientFromRequest(req);
 
     // Handle checkout.session.completed event
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
 
-      // ── PRIMARY IDEMPOTENCY LOCK: Stripe event.id ──────────────────────────
-      // Attempt to record this event atomically. If a record already exists,
-      // the event has already been fully processed — return 200 immediately.
-      const existingWebhookEvent = await base44.asServiceRole.entities.StripeWebhookEvent.filter({ event_id: event.id });
-      if (existingWebhookEvent && existingWebhookEvent.length > 0) {
-        console.log(`[WEBHOOK_DUPLICATE] event.id=${event.id} already processed — skipping.`);
-        return Response.json({ received: true });
+      // Event tickets have their own handler; never create shop orders for them.
+      if (session.metadata?.event_id) return Response.json({ received: true });
+      if (!['paid', 'no_payment_required'].includes(session.payment_status)) {
+        return Response.json({ error: 'Payment has not settled' }, { status: 503 });
       }
-
-      // ── SECONDARY GUARD: Order already exists for this session ─────────────
-      const existingOrders = await base44.asServiceRole.entities.Order.filter({
-        checkout_session_id: session.id
-      });
-      if (existingOrders && existingOrders.length > 0) {
-        console.log(`[WEBHOOK_DUPLICATE] Order already exists for session=${session.id} — skipping.`);
-        // Still record the event so future retries are caught by the primary lock
-        await base44.asServiceRole.entities.StripeWebhookEvent.create({
-          event_id: event.id,
-          event_type: event.type,
-          session_id: session.id,
-          payment_intent_id: session.payment_intent || null,
-          status: 'skipped',
-          processed_at: new Date().toISOString(),
-        });
-        return Response.json({ received: true });
-      }
-
-      // ── Record the event now, before any side effects ──────────────────────
-      await base44.asServiceRole.entities.StripeWebhookEvent.create({
-        event_id: event.id,
-        event_type: event.type,
-        session_id: session.id,
-        payment_intent_id: session.payment_intent || null,
-        status: 'processed',
-        processed_at: new Date().toISOString(),
-      });
-      console.log(`[WEBHOOK_FIRST_PROCESS] event.id=${event.id} session=${session.id}`);
 
       // Fetch line items
-      const lineItems = await stripeClient.checkout.sessions.listLineItems(session.id);
+      const lineItems = { data: [] };
+      let startingAfter;
+      do {
+        const page = await stripeClient.checkout.sessions.listLineItems(session.id, {
+          limit: 100, ...(startingAfter ? { starting_after: startingAfter } : {}),
+        });
+        lineItems.data.push(...page.data);
+        if (!page.has_more) break;
+        if (!page.data.length) throw new Error('Stripe returned incomplete line items');
+        startingAfter = page.data[page.data.length - 1].id;
+      } while (true);
 
       // ── Resolve the purchaser's user_id (ownership key) ─────────────────
       // Source of truth: session.metadata.user_id, set by createCheckout from
@@ -75,6 +57,10 @@ Deno.serve(async (req) => {
         } catch (e) { console.warn('User lookup by email failed:', e); }
       }
 
+      if (!purchaserUserId) throw new Error('Cannot resolve paid purchaser; retry or reconcile identity');
+      await recoverCheckout({
+        entities: base44.asServiceRole.entities, event, session,
+        createOrder: async () => {
       // Build order payload
       const orderData = {
         user_email: purchaserEmail || 'guest@example.com',
@@ -121,8 +107,13 @@ Deno.serve(async (req) => {
         }]
       };
 
-      const createdOrder = await base44.asServiceRole.entities.Order.create(orderData);
-      console.log('Order created:', createdOrder.id);
+      return await base44.asServiceRole.entities.Order.create(orderData);
+        },
+        fulfillOrder: async (createdOrder, { isNew }) => {
+      const inventoryErrors = [];
+      // Never replay non-transactional stock decrements on an existing order.
+      // Ambiguous interrupted inventory writes are surfaced for reconciliation.
+      if (isNew) {
 
       // Decrement inventory for each line item
       // SOURCE OF TRUTH: item.price.metadata (set via price_data.metadata in createCheckout)
@@ -146,6 +137,7 @@ Deno.serve(async (req) => {
           const product = await base44.asServiceRole.entities.Product.get(productId);
           if (!product) {
             console.warn(`Product not found for id: ${productId}`);
+            inventoryErrors.push(`Missing product ${productId}`);
             continue;
           }
           const newQty = Math.max(0, (product.inventory_qty || 0) - qty);
@@ -160,37 +152,58 @@ Deno.serve(async (req) => {
           });
           console.log(`Inventory updated for product ${productId}: ${newQty} remaining`);
         } catch (invErr) {
+          inventoryErrors.push(`Stock update failed for ${productId}`);
           console.error(`Failed to update inventory for product ${productId}:`, invErr);
         }
       }
 
+      }
+      if (!isNew && !createdOrder.events?.some(e => e.message === 'checkout_inventory_recorded_v2')) {
+        inventoryErrors.push('Interrupted delivery: verify stock before fulfillment; automatic decrement was not repeated');
+      }
+      if (isNew || inventoryErrors.length) {
+        await base44.asServiceRole.entities.Order.update(createdOrder.id, {
+          events: [...(createdOrder.events || []), {
+            timestamp: new Date().toISOString(),
+            message: inventoryErrors.length
+              ? `Inventory review required: ${inventoryErrors.join('; ')}`
+              : 'checkout_inventory_recorded_v2',
+          }],
+          ...(inventoryErrors.length ? {
+            line_items: (createdOrder.line_items || []).map(item => ({ ...item, fulfillment_status: 'needs_review' })),
+          } : {}),
+        });
+      }
+
       // If this is a Genesis Pass purchase, mark user as genesis_holder
       if (session.metadata?.product_type === 'genesis_pass') {
-        const customerEmail = orderData.user_email;
+        const customerEmail = createdOrder.user_email;
         try {
-          const users = await base44.asServiceRole.entities.User.filter({ email: customerEmail });
-          if (users && users.length > 0) {
-            await base44.asServiceRole.entities.User.update(users[0].id, { genesis_holder: true });
+          {
+            await base44.asServiceRole.entities.User.update(createdOrder.user_id, { genesis_holder: true });
             console.log('Genesis holder updated for:', customerEmail);
           }
         } catch (genesisErr) {
           console.error('Failed to set genesis_holder:', genesisErr);
+          throw genesisErr;
         }
 
         // Create the GenesisPass entity record (privileged — internal secret)
         try {
           await base44.asServiceRole.functions.invoke('grantGenesisPass', {
+            userId: createdOrder.user_id,
             userEmail: customerEmail,
             internalSecret: Deno.env.get('INTERNAL_FUNCTION_SECRET'),
           });
           console.log('GenesisPass record created for:', customerEmail);
         } catch (grantErr) {
           console.error('Failed to create GenesisPass record:', grantErr);
+          throw grantErr;
         }
 
         // Send Genesis-specific confirmation email
         try {
-          await base44.asServiceRole.integrations.Core.SendEmail({
+          if (isNew) await base44.asServiceRole.integrations.Core.SendEmail({
             to: customerEmail,
             subject: 'Welcome to the Genesis — SKRTLIFE',
             body: `
@@ -226,19 +239,19 @@ Deno.serve(async (req) => {
         // DripSync+ membership — set the canonical entitlement flag server-side.
         // Same trust model as Genesis: the signed webhook is the sole authority;
         // no client path can set this.
-        const customerEmail = orderData.user_email;
+        const customerEmail = createdOrder.user_email;
         try {
-          const users = await base44.asServiceRole.entities.User.filter({ email: customerEmail });
-          if (users && users.length > 0) {
-            await base44.asServiceRole.entities.User.update(users[0].id, { dripsync_plus_holder: true });
+          {
+            await base44.asServiceRole.entities.User.update(createdOrder.user_id, { dripsync_plus_holder: true });
             console.log('DripSync+ holder updated for:', customerEmail);
           }
         } catch (plusErr) {
           console.error('Failed to set dripsync_plus_holder:', plusErr);
+          throw plusErr;
         }
         // Reuse the standard order confirmation email (receipt).
         try {
-          await base44.asServiceRole.functions.invoke('sendOrderConfirmation', {
+          if (isNew) await base44.asServiceRole.functions.invoke('sendOrderConfirmation', {
             orderId: createdOrder.id,
             internalSecret: Deno.env.get('INTERNAL_FUNCTION_SECRET'),
           });
@@ -249,11 +262,11 @@ Deno.serve(async (req) => {
       } else {
         // Regular order confirmation
         try {
-          await base44.asServiceRole.functions.invoke('sendOrderConfirmation', {
+          if (isNew) await base44.asServiceRole.functions.invoke('sendOrderConfirmation', {
             orderId: createdOrder.id,
             internalSecret: Deno.env.get('INTERNAL_FUNCTION_SECRET'),
           });
-          console.log('Order confirmation email sent to:', orderData.user_email);
+          console.log('Order confirmation email sent to:', createdOrder.user_email);
         } catch (emailError) {
           console.error('Failed to send confirmation email:', emailError);
         }
@@ -273,18 +286,21 @@ Deno.serve(async (req) => {
             stripeSessionId: session.id,
             internalSecret: Deno.env.get('INTERNAL_FUNCTION_SECRET'),
           });
-          if (entitlementResult?.summary) {
-            const s = entitlementResult.summary;
+          {
+            const s = requireSuccessfulGrant(entitlementResult);
             console.log(`[ENTITLEMENT] order=${createdOrder.id} granted=${s.granted.length} already_owned=${s.already_owned.length} no_entitlement=${s.no_digital_entitlement.length} failed=${s.failed.length}`);
           }
         } catch (entitlementErr) {
           // A grant failure must never break order processing. It is audited
           // inside the grant function; the Order remains valid and paid.
           console.error('[ENTITLEMENT] grant failed (order survives):', entitlementErr);
+          throw entitlementErr;
         }
       } else {
-        console.warn(`[ENTITLEMENT] order=${createdOrder.id} skipped — no purchaser user_id resolved`);
+        throw new Error('Order purchaser identity is missing');
       }
+        },
+      });
     } else if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created' || event.type === 'charge.dispute.closed' || event.type === 'charge.dispute.funds_withdrawn' || event.type === 'charge.dispute.funds_reinstated') {
       // ── Refunds / Disputes — audit only, NO automatic ownership revocation ──
       // Phase E policy (deferred): whether a refund revokes a purchase-granted
@@ -330,7 +346,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ received: true });
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('Webhook error:', error);
-    return Response.json({ error: error.message }, { status: 400 });
+    return Response.json({ error: signatureVerified ? 'Fulfillment incomplete; delivery will be retried' : 'Invalid webhook signature' }, { status: signatureVerified ? 500 : 400 });
   }
 });

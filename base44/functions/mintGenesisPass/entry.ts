@@ -1,3 +1,4 @@
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { ethers } from 'npm:ethers@6.9.0';
 
@@ -12,7 +13,7 @@ function isAuthorizedAdmin(user) {
   return user && (user.role === 'admin' || user.role === 'superadmin');
 }
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
@@ -140,4 +141,4 @@ Deno.serve(async (req) => {
       details: error.message
     }, { status: 500 });
   }
-});
+}));

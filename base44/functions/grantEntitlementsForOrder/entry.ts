@@ -1,3 +1,5 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import { grantDigitalEntitlementsForOrder } from '../../shared/entitlementService.js';
 
@@ -18,14 +20,14 @@ import { grantDigitalEntitlementsForOrder } from '../../shared/entitlementServic
  * Genesis separation: this grants Wearable AssetOwnership only. Genesis Pass
  * entitlement remains a distinct flow (grantGenesisPass).
  */
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     // ── Internal-secret gate ─────────────────────────────────────────────
     const body = await req.json().catch(() => null);
     if (!body) return Response.json({ error: 'Invalid request body' }, { status: 400 });
 
-    const internalSecret = Deno.env.get('INTERNAL_FUNCTION_SECRET');
-    if (!internalSecret || body.internalSecret !== internalSecret) {
+    const internalSecret = requireServerConfiguration(name => Deno.env.get(name), 'INTERNAL_FUNCTION_SECRET');
+    if (body.internalSecret !== internalSecret) {
       console.error('[grantEntitlementsForOrder] Unauthorized — missing/invalid internal secret');
       return Response.json({ error: 'Unauthorized' }, { status: 403 });
     }
@@ -80,7 +82,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, orderId, summary });
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('[grantEntitlementsForOrder] error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

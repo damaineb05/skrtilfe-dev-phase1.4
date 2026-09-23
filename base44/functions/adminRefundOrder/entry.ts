@@ -1,9 +1,9 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import Stripe from 'npm:stripe';
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
-
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
     }
 
     // Process Stripe refund
+    const stripe = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
     const refund = await stripe.refunds.create({
       payment_intent: order.transaction_id,
       reason: 'requested_by_customer',
@@ -107,6 +108,8 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('Admin refund failed:', error);
     
     // Log failed attempt
@@ -131,4 +134,4 @@ Deno.serve(async (req) => {
       details: error.message
     }, { status: 500 });
   }
-});
+}));

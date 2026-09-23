@@ -1,9 +1,7 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.14.0';
-
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'), {
-  apiVersion: '2023-10-16',
-});
 
 /**
  * Returns true if the user holds an active Genesis Pass.
@@ -27,7 +25,7 @@ async function userHasGenesisAccess(base44, user) {
   return passes.length > 0;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
@@ -94,6 +92,7 @@ Deno.serve(async (req) => {
     }];
 
     // Create Stripe checkout session
+    const stripe = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'), { apiVersion: '2023-10-16' });
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -117,10 +116,12 @@ Deno.serve(async (req) => {
     });
 
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('❌ Event checkout error:', error);
     return Response.json(
       { error: error.message || 'Failed to create checkout session' },
       { status: 500 }
     );
   }
-});
+}));

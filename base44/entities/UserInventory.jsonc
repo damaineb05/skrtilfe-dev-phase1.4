@@ -3,7 +3,14 @@
   "type": "object",
   "properties": {
     "user_email": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "asset_type": {
       "type": "string",
@@ -12,10 +19,24 @@
         "environment",
         "emote",
         "bundle"
-      ]
+      ],
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "asset_url": {
-      "type": "string"
+      "type": "string",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "asset_name": {
       "type": "string"
@@ -35,11 +56,25 @@
         "reward",
         "default"
       ],
-      "default": "purchase"
+      "default": "purchase",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "listing_id": {
       "type": "string",
-      "description": "Original listing ID if purchased"
+      "description": "Original listing ID if purchased",
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "is_equipped": {
       "type": "boolean",
@@ -47,7 +82,14 @@
     },
     "is_tradeable": {
       "type": "boolean",
-      "default": true
+      "default": true,
+      "rls": {
+        "write": {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      }
     },
     "asset_metadata": {
       "type": "object"

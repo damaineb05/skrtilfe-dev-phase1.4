@@ -1,9 +1,9 @@
+import { contractHandler } from '../../shared/apiContract.js';
+import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14';
 
-const stripeClient = new Stripe(Deno.env.get('STRIPE_SECRET_KEY'));
-
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { items, shippingAddress, shippingMethod, successUrl, cancelUrl } = body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0 || items.length > 50) {
       return Response.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
+      if (!item || typeof item !== 'object' || typeof item.product_id !== 'string' || !/^[\w-]{1,128}$/.test(item.product_id)) return Response.json({error: 'Invalid cart item'}, {status:400});
 
       // Validate quantity: integer from 1–20
       const qty = Number(item.quantity);
@@ -89,7 +90,7 @@ Deno.serve(async (req) => {
       if (variant && typeof variant.price === 'number') {
         unitPrice = variant.price;
       }
-      if (typeof unitPrice !== 'number' || unitPrice < 0) {
+      if (typeof unitPrice !== 'number' || !Number.isFinite(unitPrice) || unitPrice < 0) {
         return Response.json({ error: `"${product.title}" has no valid price.` }, { status: 400 });
       }
 
@@ -159,6 +160,7 @@ Deno.serve(async (req) => {
     ];
 
     // Create Stripe checkout session
+    const stripeClient = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
     const session = await stripeClient.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -184,7 +186,9 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: session.url });
   } catch (error) {
+    const configurationFailure = configurationErrorResponse(error);
+    if (configurationFailure) return configurationFailure;
     console.error('createCheckout error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

@@ -1,6 +1,7 @@
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
@@ -48,4 +49,4 @@ Deno.serve(async (req) => {
     console.error('streamojiAuth error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
-});
+}));

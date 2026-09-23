@@ -1,3 +1,4 @@
+import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { ethers } from 'npm:ethers@6.9.0';
 
@@ -7,7 +8,7 @@ const GENESIS_PASS_ABI = [
   "function tokenURI(uint256 tokenId) public view returns (string memory)"
 ];
 
-Deno.serve(async (req) => {
+Deno.serve(contractHandler(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
@@ -59,4 +60,4 @@ Deno.serve(async (req) => {
       details: error.message
     }, { status: 500 });
   }
-});
+}));
