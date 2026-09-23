@@ -23,7 +23,7 @@ const DEFAULT_CUSTOMIZATION = {
   isVisible: true,
 };
 
-const ALLOWED_SOURCES = ['rpm', 'upload', 'default', 'look', 'system', 'readyplayerme'];
+const ALLOWED_SOURCES = ['rpm', 'upload', 'default', 'look', 'system', 'readyplayerme', 'streamoji'];
 
 function coerceGender(g) {
   return g === 'masculine' || g === 'feminine' || g === 'neutral' ? g : 'masculine';
@@ -151,7 +151,7 @@ export function buildCanonicalFromAvatarUrl(avatarUrl, opts = {}) {
   if (!avatarUrl || typeof avatarUrl !== 'string') return null;
   const existing = normalizeAvatarConfig(opts.existingConfig || null) || {
     schema_version: AVATAR_SCHEMA_VERSION,
-    avatar: {},
+    avatar: { id: null, model_url: null, source: null, gender: null },
     customization: { ...DEFAULT_CUSTOMIZATION },
     equipped: [],
     custom_animations: [],
