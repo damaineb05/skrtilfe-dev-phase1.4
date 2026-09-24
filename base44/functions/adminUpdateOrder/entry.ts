@@ -56,10 +56,7 @@ Deno.serve(contractHandler(async (req) => {
     return Response.json({ success: true, order: updatedOrder });
 
   } catch (error) {
-    console.error('Admin order update failed:', error);
-    return Response.json({
-      error: 'Failed to update order',
-      details: error.message
-    }, { status: 500 });
+    // Preserve provider auth status for the shared, redacted error contract.
+    throw error;
   }
 }));
