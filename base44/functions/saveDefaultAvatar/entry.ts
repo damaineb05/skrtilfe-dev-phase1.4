@@ -46,7 +46,7 @@ Deno.serve(contractHandler(async (req) => {
 
     return Response.json({ success: true, avatar_config: canonical });
   } catch (error) {
-    console.error('saveDefaultAvatar error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    // Preserve provider auth status for the shared, redacted error contract.
+    throw error;
   }
 }));
