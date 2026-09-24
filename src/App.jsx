@@ -103,7 +103,6 @@ const AuthenticatedApp = () => {
       <Route path="/AvatarOS" element={<AvatarOS />} />
       <Route path="/World" element={<Suspense fallback={<div style={{ position: 'fixed', inset: 0, background: '#070709' }} />}><World /></Suspense>} />
       <Route path="/MembershipSuccess" element={<MembershipSuccess />} />
-      <Route path="/oauth/consent" element={<OAuthConsent />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -117,7 +116,10 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <Routes>
+            <Route path="/oauth/consent" element={<OAuthConsent />} />
+            <Route path="/*" element={<AuthenticatedApp />} />
+          </Routes>
         </Router>
         <Toaster />
         <DebugReportButton />
