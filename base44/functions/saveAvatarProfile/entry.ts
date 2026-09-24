@@ -97,7 +97,7 @@ Deno.serve(contractHandler(async (req) => {
     await base44.asServiceRole.entities.User.update(user.id, { avatar_config: desired });
     return Response.json({ success: true, avatar_config: desired });
   } catch (error) {
-    console.error('[saveAvatarProfile] error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    // Preserve provider auth status for the shared, redacted error contract.
+    throw error;
   }
 }));
