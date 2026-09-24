@@ -36,7 +36,8 @@ export function contractHandler(handler) {
       const status = response.status;
       return Response.json({ ...((status < 500) ? data : {}), code: ['SERVER_CONFIGURATION_MISSING','PAYMENT_PROVIDER_AUTH_FAILED'].includes(data.code) ? data.code : (ERROR_CODES[status] || 'SERVER_ERROR'), error: status >= 500 ? 'Request could not be completed' : (data.error || 'Request rejected') }, { status });
     } catch (error) {
-      const status = [400,401,403,404,409,413].includes(error.status) ? error.status : 500;
+      const providerStatus = error.status ?? error.response?.status;
+      const status = [400,401,403,404,409,413].includes(providerStatus) ? providerStatus : 500;
       return Response.json({ code: ERROR_CODES[status], error: status === 500 ? 'Request could not be completed' : error.message }, { status });
     }
   };
