@@ -11,6 +11,10 @@
  */
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
+import { normalizeAvatarConfig } from '@/lib/avatarConfig';
+import { buildCanonicalConfig, persistAvatarProfile } from '@/lib/avatarPersistence';
 import { createPageUrl } from '@/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
@@ -40,6 +44,8 @@ const BRAND_IMAGES = [
 const GATE_KEY = 'skrt_gate_dismissed';
 
 export default function Home() {
+  const { updateUser } = useAuth();
+  const { toast } = useToast();
   const [showGate, setShowGate]         = useState(false);
   const [gateReady, setGateReady]       = useState(false);
   const [currentUser, setCurrentUser]   = useState(null);
@@ -195,10 +201,22 @@ export default function Home() {
         isOpen={showStreamoji}
         onClose={() => setShowStreamoji(false)}
         currentUser={currentUser}
-        onAvatarExported={(url) => {
+        onAvatarExported={async (url) => {
           setShowStreamoji(false);
-          if (currentUser) base44.auth.updateMe({ avatar_config: { ...(currentUser?.avatar_config || {}), avatarUrl: url } });
-          else base44.auth.redirectToLogin(createPageUrl('DripSync'));
+          if (!currentUser) {
+            base44.auth.redirectToLogin(createPageUrl('DripSync'));
+            return;
+          }
+          const config = normalizeAvatarConfig(currentUser.avatar_config) || buildCanonicalConfig({ avatarSource: url });
+          config.avatar = { ...config.avatar, id: null, model_url: url, source: 'streamoji' };
+          const result = await persistAvatarProfile(config, {
+            expectedRevision: currentUser.avatar_config?.revision ?? 0,
+            onUserUpdate: (saved) => {
+              setCurrentUser((user) => ({ ...user, avatar_config: saved }));
+              updateUser((user) => ({ ...user, avatar_config: saved }));
+            },
+          });
+          if (!result.success) toast({ variant: 'destructive', title: 'Avatar not saved', description: result.error });
         }}
       />
       <WalletConnectModal isOpen={showWalletModal} onClose={() => setShowWalletModal(false)} />

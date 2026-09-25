@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ArrowLeft, Check, Zap, Star, Crown } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { normalizeAvatarConfig } from '@/lib/avatarConfig';
+import { buildCanonicalConfig, persistAvatarProfile } from '@/lib/avatarPersistence';
 
 const INTERESTS = [
   { id: 'fashion', label: 'Fashion', emoji: '👗' },
@@ -31,6 +33,7 @@ export default function Onboarding() {
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // Redirect if already onboarded or not logged in
   useEffect(() => {
@@ -51,22 +54,33 @@ export default function Onboarding() {
 
   const handleComplete = async () => {
     setSaving(true);
-    const updates = {
-      onboarding_complete: true,
-      interests: selectedInterests,
-    };
-    if (selectedAvatar) {
-      updates.avatar_config = {
-        ...(user?.avatar_config || {}),
-        avatarUrl: selectedAvatar.url,
-        defaultAvatarId: selectedAvatar.id,
-        isDefaultAvatar: true,
-      };
+    setSaveError('');
+    const updates = { onboarding_complete: true, interests: selectedInterests };
+    try {
+      let savedAvatar = null;
+      if (selectedAvatar) {
+        const existing = normalizeAvatarConfig(user?.avatar_config) || buildCanonicalConfig({ avatarSource: selectedAvatar.url });
+        const config = {
+          ...existing,
+          avatar: { ...existing.avatar, id: selectedAvatar.id, model_url: selectedAvatar.url, source: 'default' },
+        };
+        const result = await persistAvatarProfile(config, { expectedRevision: user?.avatar_config?.revision ?? 0 });
+        if (!result.success) {
+          setSaveError(result.error || 'Could not save your avatar. Please try again.');
+          return;
+        }
+        savedAvatar = result.avatar_config;
+        updateUser?.(prev => ({ ...(prev || {}), avatar_config: savedAvatar }));
+      }
+      await base44.auth.updateMe(updates);
+      updateUser?.(prev => ({ ...(prev || {}), ...updates, ...(savedAvatar ? { avatar_config: savedAvatar } : {}) }));
+      base44.analytics.track({ eventName: 'onboarding_complete', properties: { interests: selectedInterests.join(',') } });
+      navigate('/Dashboard');
+    } catch {
+      setSaveError('Could not finish setup. Please try again.');
+    } finally {
+      setSaving(false);
     }
-    await base44.auth.updateMe(updates).catch(() => {});
-    updateUser?.(prev => ({ ...(prev || {}), ...updates }));
-    base44.analytics.track({ eventName: 'onboarding_complete', properties: { interests: selectedInterests.join(',') } });
-    navigate('/Dashboard');
   };
 
   const steps = [
@@ -79,7 +93,7 @@ export default function Onboarding() {
     // Step 3: Explore
     <StepExplore key="explore" onNext={() => setStep(4)} onBack={() => setStep(2)} />,
     // Step 4: Done
-    <StepDone key="done" saving={saving} onComplete={handleComplete} onBack={() => setStep(3)} />,
+    <StepDone key="done" saving={saving} error={saveError} onComplete={handleComplete} onBack={() => setStep(3)} />,
   ];
 
   return (
@@ -240,7 +254,7 @@ function StepExplore({ onNext, onBack }) {
   );
 }
 
-function StepDone({ saving, onComplete, onBack }) {
+function StepDone({ saving, error, onComplete, onBack }) {
   return (
     <div className="text-center">
       <button onClick={onBack} className="flex items-center gap-2 text-xs mb-6" style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -256,6 +270,7 @@ function StepDone({ saving, onComplete, onBack }) {
         style={{ background: '#00D4FF', color: '#000' }}>
         {saving ? 'Saving...' : <>Enter the Society <ArrowRight className="w-4 h-4" /></>}
       </button>
+      {error && <p role="alert" className="text-sm text-red-400 mt-4">{error}</p>}
     </div>
   );
 }
