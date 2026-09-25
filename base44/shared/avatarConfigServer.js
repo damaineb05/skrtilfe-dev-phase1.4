@@ -81,6 +81,7 @@ function sanitizeV2(c) {
   const avatar = c.avatar || {};
   return {
     schema_version: AVATAR_SCHEMA_VERSION,
+    revision: c.revision === undefined ? 0 : c.revision,
     avatar: {
       id: avatar.id || null,
       model_url: avatar.model_url || avatar.url || null,
@@ -112,6 +113,7 @@ function migrateLegacy(c) {
   customization.isVisible = customization.isVisible !== false;
   return {
     schema_version: AVATAR_SCHEMA_VERSION,
+    revision: c.revision === undefined ? 0 : c.revision,
     avatar: {
       id: c.avatarId || c.avatar_id || null,
       model_url: c.avatarUrl || c.avatar_url || null,
@@ -151,6 +153,7 @@ export function buildCanonicalFromAvatarUrl(avatarUrl, opts = {}) {
   if (!avatarUrl || typeof avatarUrl !== 'string') return null;
   const existing = normalizeAvatarConfig(opts.existingConfig || null) || {
     schema_version: AVATAR_SCHEMA_VERSION,
+    revision: 0,
     avatar: { id: null, model_url: null, source: null, gender: null },
     customization: { ...DEFAULT_CUSTOMIZATION },
     equipped: [],
@@ -162,6 +165,7 @@ export function buildCanonicalFromAvatarUrl(avatarUrl, opts = {}) {
   return {
     ...existing,
     schema_version: AVATAR_SCHEMA_VERSION,
+    revision: existing.revision,
     avatar: {
       id: String(avatarUrl).split('/').pop()?.split('.')[0] || existing.avatar?.id || null,
       model_url: avatarUrl,

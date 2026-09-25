@@ -1,11 +1,12 @@
 import { assertAssetUrl, assertSafeTree, invalid, isRecord } from './apiContract.js';
 import { normalizeAvatarConfig } from './avatarConfigServer.js';
 const APPEARANCE_FIELDS = new Set(('skinTone eyeColor hairColor height isVisible currentAction hairStyleId hairAssetUrl skinFinish skinOverlay overlayStrength headScale shoulderWidth limbScale facialHairStyleId facialHairColor facialHairDensity eyebrowColor eyebrowThickness irisHue irisSaturation irisBrightness pupilSize scleraTint scleraTintStrength limbalRingIntensity eyeGloss topColor bottomColor shoeColor meshOverrides morphTargets').split(' '));
-const TOP_FIELDS = new Set('schema_version avatar customization equipped custom_animations environment current_realm updated_at'.split(' '));
+const TOP_FIELDS = new Set('schema_version revision avatar customization equipped custom_animations environment current_realm updated_at'.split(' '));
 function keys(value, allowed) { if (!isRecord(value) || Object.keys(value).some(k => !allowed.has(k))) throw invalid('Unexpected avatar fields'); }
 export function validateAvatarConfig(raw, options = {}) {
   if (!isRecord(raw) || new TextEncoder().encode(JSON.stringify(raw)).length > 262144) throw invalid('Avatar config exceeds 256 KiB or is not an object');
   assertSafeTree(raw);
+  if (raw.revision !== undefined && (!Number.isSafeInteger(raw.revision) || raw.revision < 0)) throw invalid('Invalid avatar revision');
   if (raw.schema_version !== undefined && raw.schema_version !== 2) throw invalid('Unsupported avatar version');
   if (raw.schema_version === 2) keys(raw, TOP_FIELDS);
   if (raw.customization && (!isRecord(raw.customization) || ('isVisible' in raw.customization && typeof raw.customization.isVisible !== 'boolean'))) throw invalid('Invalid customization');

@@ -34,6 +34,7 @@ export default function useAvatarActions({
       ...runtimeOverrides,
     });
     return persistAvatarProfile(config, {
+      expectedRevision: user?.avatar_config?.revision ?? 0,
       onUserUpdate: (cfg) => setUser((u) => ({ ...(u || {}), avatar_config: cfg })),
       onUnauthorized: (ids) => {
         toast({

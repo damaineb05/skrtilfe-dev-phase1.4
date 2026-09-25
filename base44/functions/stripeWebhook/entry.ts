@@ -2,6 +2,7 @@ import { requireServerConfiguration, configurationErrorResponse } from '../../sh
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14';
 import { recoverCheckout, requireSuccessfulGrant } from '../../shared/checkoutRecovery.js';
+import { resolveDeployment } from '../../shared/deploymentPolicy.js';
 
 Deno.serve(async (req) => {
   const signature = req.headers.get('stripe-signature');
@@ -19,6 +20,7 @@ Deno.serve(async (req) => {
     );
 
     signatureVerified = true;
+    const deployment = resolveDeployment(Deno.env.get('BASE44_APP_ID'));
     const base44 = createClientFromRequest(req);
 
     // Handle checkout.session.completed event
@@ -226,7 +228,7 @@ Deno.serve(async (req) => {
                     <li>Genesis community access</li>
                   </ul>
                 </div>
-                <p style="color: rgba(255,255,255,0.7);">Head to DripSync to start building your look: <a href="https://skrtlife.com/DripSync" style="color: #00D4FF;">skrtlife.com/DripSync</a></p>
+                <p style="color: rgba(255,255,255,0.7);">Head to DripSync to start building your look: <a href="${deployment.applicationOrigin}/DripSync" style="color: #00D4FF;">${deployment.applicationOrigin}/DripSync</a></p>
                 <p style="color: rgba(255,255,255,0.4); font-size: 12px; text-align: center; margin-top: 30px;">© ${new Date().getFullYear()} SKRTLIFE. All rights reserved.</p>
               </div>
             `

@@ -180,6 +180,11 @@
           "type": "integer",
           "default": 2
         },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Server-advanced optimistic save revision, separate from schema_version. Missing legacy revision means 0. Clients must submit expectedRevision; timestamps are not concurrency tokens."
+        },
         "avatar": {
           "type": "object",
           "description": "The avatar body identity",
@@ -380,20 +385,6 @@
           "format": "date-time"
         }
       }
-    },
-    "id": {
-      "type": "string",
-      "rls": {
-        "write": false
-      },
-      "description": "Provider-controlled identity field; never client assigned."
-    },
-    "email": {
-      "type": "string",
-      "rls": {
-        "write": false
-      },
-      "description": "Provider-controlled identity field; never client assigned."
     },
     "role": {
       "type": "string",

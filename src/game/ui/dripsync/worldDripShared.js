@@ -43,7 +43,9 @@ const EXCLUSIVE_SLOTS = [
  */
 export async function applyAvatarConfig(newConfig, updateUser) {
   try {
-    const res = await base44.functions.invoke('saveAvatarProfile', { avatar_config: newConfig });
+    const res = await base44.functions.invoke('saveAvatarProfile', {
+      avatar_config: newConfig, expectedRevision: newConfig.revision ?? 0,
+    });
     const data = res?.data;
     if (data?.success && data.avatar_config) {
       if (updateUser) {
@@ -91,6 +93,7 @@ export function buildConfigFromLook(look, baseConfig = {}) {
   };
 
   const v1 = {
+    revision: baseConfig.revision ?? 0,
     avatarUrl,
     wearables,
     customAnimations,

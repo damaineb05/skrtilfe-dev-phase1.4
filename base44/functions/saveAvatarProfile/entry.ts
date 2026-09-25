@@ -14,7 +14,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
  *          the authenticated user owns it (AssetOwnership) OR it is an
  *          explicit default/free Wearable (is_default === true).
  *       3. reject unauthorized equipped ids with 403 (do not silently strip).
- *       4. persist the sanitized v2 config via auth.updateMe.
+ *       4. compare expectedRevision, then persist sanitized v2 config + next revision.
+ *          This is optimistic stale-write rejection, not a datastore atomicity guarantee.
  *
  *   User.avatar_config  = how I look   (this function writes it)
  *   AssetOwnership       = what I own   (read-only here; granted by stripeWebhook)
@@ -27,6 +28,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.44';
  */
 
 import { validateAvatarConfig } from '../../shared/avatarValidation.js';
+import { assertExpectedRevision, writeRevisionedAvatar } from '../../shared/avatarRevision.js';
 
 // Canonical avatar sanitization (normalizeAvatarConfig + helpers) now lives
 // in base44/shared/avatarConfigServer.js, shared with saveDefaultAvatar. The
@@ -42,6 +44,9 @@ Deno.serve(contractHandler(async (req) => {
     const body = await req.json().catch(() => null);
     if (!body) return Response.json({ error: 'Invalid request body' }, { status: 400 });
 
+    // Missing revisions on old accounts mean zero; missing request revisions are rejected.
+    assertExpectedRevision(body.expectedRevision, user.avatar_config);
+
     // ── 1. Normalize incoming config → canonical v2 ──────────────────────
     let desired;
     try { desired = validateAvatarConfig(body.avatar_config || body); } catch (error) { return Response.json({ error: error.message }, { status: 400 }); }
@@ -54,10 +59,8 @@ Deno.serve(contractHandler(async (req) => {
     const catalogSet = new Set(catalogIds);
 
     if (catalogSet.size === 0) {
-      // No catalog entitlements to verify — persist directly.
-      desired.updated_at = new Date().toISOString();
-      await base44.asServiceRole.entities.User.update(user.id, { avatar_config: desired });
-      return Response.json({ success: true, avatar_config: desired });
+      const saved = await writeRevisionedAvatar(base44, user.id, body.expectedRevision, desired);
+      return Response.json({ success: true, avatar_config: saved });
     }
 
     // ── 3. Load the user's ownership ledger (AssetOwnership) ─────────────
@@ -93,9 +96,8 @@ Deno.serve(contractHandler(async (req) => {
     }
 
     // ── 5. Persist the sanitized canonical v2 config ────────────────────
-    desired.updated_at = new Date().toISOString();
-    await base44.asServiceRole.entities.User.update(user.id, { avatar_config: desired });
-    return Response.json({ success: true, avatar_config: desired });
+    const saved = await writeRevisionedAvatar(base44, user.id, body.expectedRevision, desired);
+    return Response.json({ success: true, avatar_config: saved });
   } catch (error) {
     // Preserve provider auth status for the shared, redacted error contract.
     throw error;

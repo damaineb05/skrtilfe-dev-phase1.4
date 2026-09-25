@@ -2,6 +2,7 @@ import { assertAssetUrl } from '../../shared/apiContract.js';
 import { contractHandler } from '../../shared/apiContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import { buildCanonicalFromAvatarUrl } from '../../shared/avatarConfigServer.js';
+import { assertExpectedRevision } from '../../shared/avatarRevision.js';
 
 /**
  * saveDefaultAvatar — sets the user's default avatar BODY as canonical v2.
@@ -16,11 +17,9 @@ import { buildCanonicalFromAvatarUrl } from '../../shared/avatarConfigServer.js'
  *     outfit)
  *   - is owned by auth.me() (identity never trusted from the body)
  *
- * NOTE: This path writes the avatar BODY only. Equipped catalog wearables are
- * still ownership-enforced at equip time by saveAvatarProfile. A default-body
- * write does NOT grant or validate ownership — it carries whatever equipped
- * set the user already had. This is safe: equipping was already validated when
- * those items were equipped via saveAvatarProfile.
+ * Compatibility adapter: forwards to saveAvatarProfile with the caller's expectedRevision.
+ * Existing equipment is preserved and revalidated by that canonical write path;
+ * this function never updates User.avatar_config directly.
  */
 Deno.serve(contractHandler(async (req) => {
   try {
@@ -28,7 +27,8 @@ Deno.serve(contractHandler(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { avatarUrl, gender } = await req.json();
+    const { avatarUrl, gender, expectedRevision } = await req.json();
+    assertExpectedRevision(expectedRevision, user.avatar_config);
     if (!avatarUrl || typeof avatarUrl !== 'string') {
       return Response.json({ error: 'Avatar URL is required' }, { status: 400 });
     }
@@ -42,9 +42,11 @@ Deno.serve(contractHandler(async (req) => {
     });
     if (!canonical) return Response.json({ error: 'Invalid avatar URL' }, { status: 400 });
 
-    await base44.asServiceRole.entities.User.update(user.id, { avatar_config: canonical });
-
-    return Response.json({ success: true, avatar_config: canonical });
+    // Compatibility adapter only: canonical writer owns validation and revision advancement.
+    const result = await base44.functions.invoke('saveAvatarProfile', {
+      avatar_config: canonical, expectedRevision,
+    });
+    return Response.json(result.data);
   } catch (error) {
     // Preserve provider auth status for the shared, redacted error contract.
     throw error;

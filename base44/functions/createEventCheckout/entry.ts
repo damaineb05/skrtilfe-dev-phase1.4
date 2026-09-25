@@ -1,27 +1,15 @@
 import { contractHandler } from '../../shared/apiContract.js';
-import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
+import { configurationErrorResponse } from '../../shared/serverConfiguration.js';
+import { createSafeCheckoutSession } from '../../shared/checkoutSafety.js';
+import { resolveDeployment } from '../../shared/deploymentPolicy.js';
+import { activeGenesisQuery } from '../../shared/genesisContract.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Stripe from 'npm:stripe@14.14.0';
 
-/**
- * Returns true if the user holds an active Genesis Pass.
- * Source of truth (in priority order):
- *  1. user.role === 'admin' (admins always have access)
- *  2. user.genesis_holder === true (flag set at purchase time)
- *  3. A GenesisPass entity record for this user with status 'active'
- */
+/** Admin access is an explicit role policy; paid Genesis access requires its canonical record. */
 async function userHasGenesisAccess(base44, user) {
-  // Admins always have access
   if (user.role === 'admin') return true;
-
-  // Fast path: flag on the user record
-  if (user.genesis_holder === true) return true;
-
-  // Authoritative check: GenesisPass entity
-  const passes = await base44.asServiceRole.entities.GenesisPass.filter({
-    user_email: user.email,
-    status: 'active',
-  });
+  const passes = await base44.asServiceRole.entities.GenesisPass.filter(activeGenesisQuery(user.id));
   return passes.length > 0;
 }
 
@@ -92,13 +80,13 @@ Deno.serve(contractHandler(async (req) => {
     }];
 
     // Create Stripe checkout session
-    const stripe = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'), { apiVersion: '2023-10-16' });
-    const session = await stripe.checkout.sessions.create({
+    const deployment = resolveDeployment(Deno.env.get('BASE44_APP_ID'));
+    const session = await createSafeCheckoutSession(Stripe, name => Deno.env.get(name), {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: success_url || `${req.headers.get('origin')}/events?success=true`,
-      cancel_url: cancel_url || `${req.headers.get('origin')}/events?cancelled=true`,
+      success_url: success_url || `${deployment.applicationOrigin}/Events?success=true`,
+      cancel_url: cancel_url || `${deployment.applicationOrigin}/Events?cancelled=true`,
       customer_email: user.email,
       metadata: {
         base44_app_id: Deno.env.get('BASE44_APP_ID'),
@@ -106,7 +94,7 @@ Deno.serve(contractHandler(async (req) => {
         user_email: user.email,
         event_title: event.title,
       },
-    });
+    }, { apiVersion: '2023-10-16' });
 
     console.log('✅ Checkout session created:', session.id);
 

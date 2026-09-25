@@ -1,3 +1,5 @@
+import { resolveFunctionVersion } from '@/lib/functionVersion';
+
 const isNode = typeof window === 'undefined';
 const windowObj = isNode ? { localStorage: new Map() } : window;
 const storage = windowObj.localStorage;
@@ -43,7 +45,7 @@ const getAppParams = () => {
 		appId: "6ab3d55363a10359643b4447", // Fixed disposable development backend; URL/storage cannot redirect it.
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 		fromUrl: getAppParamValue("from_url", { defaultValue: window.location.href }),
-		functionsVersion: getAppParamValue("functions_version", { defaultValue: import.meta.env.VITE_BASE44_FUNCTIONS_VERSION }),
+		functionsVersion: resolveFunctionVersion(import.meta.env, isNode ? '' : window.location.search),
 		appBaseUrl: "", // SDK routes directly to the fixed Base44 development app.
 	}
 }

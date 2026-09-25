@@ -115,6 +115,7 @@ export function fingerprintConfig(config) {
   try {
     const c = { ...config };
     delete c.updated_at;
+    delete c.revision;
     return JSON.stringify(c);
   } catch {
     return '';
@@ -122,10 +123,18 @@ export function fingerprintConfig(config) {
 }
 
 // ── Persist through saveAvatarProfile (the ONE secure path) ──────────────────
-// Returns { success, status, avatar_config?, error?, unauthorized_wearable_ids? }
-export async function persistAvatarProfile(config, { onUserUpdate, onUnauthorized, onNetworkError } = {}) {
+/**
+ * @param {any} config
+ * @param {{expectedRevision?: number, onUserUpdate?: (config: any) => void, onUnauthorized?: (ids: string[]) => void, onNetworkError?: (error: any) => void}} [options]
+ */
+export async function persistAvatarProfile(config, { expectedRevision = config?.revision, onUserUpdate, onUnauthorized, onNetworkError } = {}) {
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
+    return { success: false, status: 400, error: 'Reload your avatar before saving: its revision is missing.' };
+  }
   try {
-    const res = await base44.functions.invoke('saveAvatarProfile', { avatar_config: config });
+    const res = await base44.functions.invoke('saveAvatarProfile', {
+      avatar_config: { ...config, revision: expectedRevision }, expectedRevision,
+    });
     const data = res.data;
     if (data && data.success && data.avatar_config) {
       if (onUserUpdate) onUserUpdate(data.avatar_config);
@@ -133,8 +142,11 @@ export async function persistAvatarProfile(config, { onUserUpdate, onUnauthorize
     }
     return { success: false, status: 200, error: (data && data.error) || 'Unknown response' };
   } catch (err) {
-    const status = err?.response?.status;
-    const body = err?.response?.data;
+    const status = err?.response?.status ?? err?.status;
+    const body = err?.response?.data ?? err?.data;
+    if (status === 409) {
+      return { success: false, status: 409, error: body?.error || 'Your saved avatar changed. Reload it before saving again; your draft was not saved.' };
+    }
     if (status === 403 && body && Array.isArray(body.unauthorized_wearable_ids)) {
       if (onUnauthorized) onUnauthorized(body.unauthorized_wearable_ids);
       return { success: false, status: 403, unauthorized_wearable_ids: body.unauthorized_wearable_ids, error: body.error };
@@ -155,6 +167,8 @@ export async function persistAvatarProfile(config, { onUserUpdate, onUnauthorize
 //   UNINITIALIZED → HYDRATING → READY → DIRTY → SAVING → READY
 //
 export function useAvatarProfilePersistence({
+  user,
+  onConflict,
   enabled = true,
   getRuntimeState,
   stateFingerprint = '',
@@ -169,6 +183,18 @@ export function useAvatarProfilePersistence({
   const inFlightRef = useRef(null);
   const timerRef = useRef(null);
   const [isSaving, setIsSaving] = useState(false);
+  const revisionRef = useRef(user?.avatar_config?.revision ?? 0);
+  const conflictedRef = useRef(false);
+  const onConflictRef = useRef(onConflict);
+  onConflictRef.current = onConflict;
+  useEffect(() => {
+    revisionRef.current = user?.avatar_config?.revision ?? 0;
+  }, [user?.id, user?.avatar_config?.revision]);
+  useEffect(() => {
+    conflictedRef.current = false;
+    lastPersistedFpRef.current = '';
+    rejectedFpRef.current = '';
+  }, [user?.id]);
 
   // Keep the latest getter + callbacks in refs so saveNow has a STABLE identity
   // (the debounce effect must not reset on unrelated re-renders like panel toggles).
@@ -186,7 +212,9 @@ export function useAvatarProfilePersistence({
 
   // End hydration and seed the persisted fingerprint so the just-loaded state
   // is not immediately re-saved.
-  const endHydration = useCallback((seedFingerprint) => {
+  const endHydration = useCallback((seedFingerprint, revision = 0) => {
+    revisionRef.current = revision;
+    conflictedRef.current = false;
     lastPersistedFpRef.current = seedFingerprint || '';
     rejectedFpRef.current = '';
     // flip after the current render batch so post-hydration effect runs skip
@@ -194,6 +222,7 @@ export function useAvatarProfilePersistence({
   }, []);
 
   const saveNow = useCallback(async (opts = {}) => {
+    if (conflictedRef.current) return { success: false, status: 409, error: 'Reload your saved avatar before saving again.' };
     const runtime = opts.runtime || (getStateRef.current && getStateRef.current());
     if (!runtime || !runtime.avatarSource) return { success: false, skipped: 'no-avatar' };
     const config = buildCanonicalConfig(runtime);
@@ -208,18 +237,23 @@ export function useAvatarProfilePersistence({
     }
 
     // If a save is already in flight for this fingerprint, await it.
-    if (inFlightRef.current && inFlightRef.current.fp === fp) {
-      return inFlightRef.current.promise;
+    if (inFlightRef.current) {
+      if (inFlightRef.current.fp === fp) return inFlightRef.current.promise;
+      const previous = await inFlightRef.current.promise;
+      if (!previous.success) return previous;
+      return saveNow(opts);
     }
 
     setIsSaving(true);
     const sentFp = fp;
     const promise = (async () => {
       const res = await persistAvatarProfile(config, {
+        expectedRevision: revisionRef.current,
         onUserUpdate: (persistedCfg) => {
-          // Stale guard: only apply if no newer local state superseded this save.
-          const currentFp = fingerprintConfig(buildCanonicalConfig(getStateRef.current && getStateRef.current()));
-          if (sentFp === currentFp && onUserUpdateRef.current) onUserUpdateRef.current(persistedCfg);
+          revisionRef.current = persistedCfg.revision;
+          // Update the canonical receipt/revision, not the editor's newer local draft.
+          // DripSync hydrates runtime on identity change, not on these receipt updates.
+          if (onUserUpdateRef.current) onUserUpdateRef.current(persistedCfg);
         },
         onUnauthorized: (ids) => {
           rejectedFpRef.current = sentFp;
@@ -233,6 +267,9 @@ export function useAvatarProfilePersistence({
         rejectedFpRef.current = '';
       } else if (res.status === 403) {
         rejectedFpRef.current = sentFp;
+      } else if (res.status === 409) {
+        conflictedRef.current = true;
+        onConflictRef.current?.(res.error);
       }
       return res;
     })();

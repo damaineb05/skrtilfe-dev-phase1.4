@@ -189,7 +189,9 @@ function DripSyncInner() {
   }), [avatarSource, avatarGender, environment, currentRealm, customization, wearables, customAnimations]);
 
   const { beginHydration, endHydration, saveNow } = useAvatarProfilePersistence({
-    enabled: !!user && !isDemoMode,
+    user,
+    onConflict: (message) => toast({ variant: 'destructive', title: 'Avatar changed elsewhere', description: message }),
+    enabled: !!user && !isDemoMode && !getPendingAvatar(),
     getRuntimeState,
     stateFingerprint,
     autoSave,
@@ -201,7 +203,7 @@ function DripSyncInner() {
         duration: 4000,
       });
     },
-    onUserUpdate: (cfg) => updateAuthUser((u) => ({ ...(u || {}), avatar_config: cfg })),
+    onUserUpdate: (cfg) => setUserAndContext((u) => ({ ...(u || {}), avatar_config: cfg })),
   });
 
   const { hydrateTraitsFromRPM, redoRpmPull, handleSaveAvatar } = useAvatarActions({
@@ -324,9 +326,9 @@ function DripSyncInner() {
       endHydration(fingerprintConfig(buildCanonicalConfig({
         ...hydrated,
         avatarSource: sourceWithTs,
-      })));
+      })), authUser.avatar_config?.revision ?? 0);
     } else {
-      endHydration('');
+      endHydration('', authUser.avatar_config?.revision ?? 0);
       // If a guest avatar is pending migration, suppress the default-avatar
       // picker — the GuestIdentityFlow will hydrate from the migrated config.
       if (getPendingAvatar()) {
@@ -793,7 +795,8 @@ function DripSyncInner() {
     setGuestFlow('syncing');
     try {
       const res = await persistAvatarProfile(config, {
-        onUserUpdate: (cfg) => updateAuthUser((u) => ({ ...(u || {}), avatar_config: cfg })),
+        expectedRevision: config.revision,
+        onUserUpdate: (cfg) => setUserAndContext((u) => ({ ...(u || {}), avatar_config: cfg })),
       });
       if (res.success && res.avatar_config) {
         clearPendingAvatar();
@@ -810,7 +813,7 @@ function DripSyncInner() {
         }
         // Seed the persistence hook's dedup fingerprint so the just-migrated
         // state is not immediately re-saved by autosave.
-        endHydration(fingerprintConfig(res.avatar_config));
+        endHydration(fingerprintConfig(res.avatar_config), res.avatar_config.revision);
         setGuestFlow('success');
         base44.analytics.track({ eventName: 'identity_created' });
       } else if (res.status === 403) {
@@ -837,7 +840,8 @@ function DripSyncInner() {
     if (!authUser) return;
     const pending = getPendingAvatar();
     if (!pending) return;
-    pendingConfigRef.current = pending.config;
+    // Observe the authenticated profile revision once, before any replace-saved-look decision.
+    pendingConfigRef.current = { ...pending.config, revision: authUser.avatar_config?.revision ?? 0 };
     const existing = normalizeAvatarConfig(authUser.avatar_config);
     if (existing && existing.avatar && existing.avatar.model_url) {
       // CASE B — existing canonical avatar: let the user choose.

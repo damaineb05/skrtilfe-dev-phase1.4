@@ -12,6 +12,7 @@ import { contractHandler } from '../../shared/apiContract.js';
  * looking up the user record.
  */
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { activeGenesisQuery } from '../../shared/genesisContract.js';
 
 Deno.serve(contractHandler(async (req) => {
   try {
@@ -63,10 +64,7 @@ Deno.serve(contractHandler(async (req) => {
     }
 
     // Check if user already has an active pass
-    const existing = await base44.asServiceRole.entities.GenesisPass.filter({
-      user_id: targetUserId,
-      is_active: true,
-    });
+    const existing = await base44.asServiceRole.entities.GenesisPass.filter(activeGenesisQuery(targetUserId));
 
     if (existing?.length > 0) {
       return Response.json({ success: true, alreadyHeld: true, pass: existing[0] });
@@ -111,6 +109,7 @@ Deno.serve(contractHandler(async (req) => {
 
     return Response.json({ success: true, pass, passNumber });
   } catch (error) {
+    if (error?.status === 400) return Response.json({ error: error.message }, { status: 400 });
     return Response.json({ error: error.message }, { status: 500 });
   }
 }));

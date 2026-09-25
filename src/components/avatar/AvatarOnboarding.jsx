@@ -11,8 +11,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, Sparkles, Check } from 'lucide-react';
 import { DEFAULT_AVATARS, getAvatarById } from '@/lib/defaultAvatars';
 import { buildCanonicalConfig, persistAvatarProfile } from '@/lib/avatarPersistence';
+import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function AvatarOnboarding({ isOpen, onClose, onComplete }) {
+  const { user, updateUser } = useAuth();
+  const { toast } = useToast();
   const [selected, setSelected] = useState(null);
   const [saving, setSaving] = useState(false);
   const [hovered, setHovered] = useState(null);
@@ -30,7 +34,12 @@ export default function AvatarOnboarding({ isOpen, onClose, onComplete }) {
       environment: null,
       currentRealm: null,
     });
-    return persistAvatarProfile(config);
+    const result = await persistAvatarProfile(config, {
+      expectedRevision: user?.avatar_config?.revision ?? 0,
+      onUserUpdate: (cfg) => updateUser((u) => ({ ...u, avatar_config: cfg })),
+    });
+    if (!result.success) toast({ variant: 'destructive', title: 'Avatar not saved', description: result.error });
+    return result;
   };
 
   const handleConfirm = async () => {

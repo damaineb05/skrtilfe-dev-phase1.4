@@ -1,5 +1,6 @@
 import { contractHandler } from '../../shared/apiContract.js';
-import { requireServerConfiguration, configurationErrorResponse } from '../../shared/serverConfiguration.js';
+import { configurationErrorResponse } from '../../shared/serverConfiguration.js';
+import { createSafeCheckoutSession } from '../../shared/checkoutSafety.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import Stripe from 'npm:stripe@14';
 
@@ -52,8 +53,7 @@ Deno.serve(contractHandler(async (req) => {
       quantity: 1,
     };
 
-    const stripeClient = new Stripe(requireServerConfiguration(name => Deno.env.get(name), 'STRIPE_SECRET_KEY'));
-    const session = await stripeClient.checkout.sessions.create({
+    const session = await createSafeCheckoutSession(Stripe, name => Deno.env.get(name), {
       payment_method_types: ['card'],
       line_items: [lineItem],
       mode: 'subscription',

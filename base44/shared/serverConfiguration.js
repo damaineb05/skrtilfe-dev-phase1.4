@@ -11,6 +11,9 @@ export function requireServerConfiguration(readEnvironment, name) {
 
 /** Preserve other errors; classify only missing config or Stripe authentication. */
 export function configurationErrorResponse(error) {
+  if (['CHECKOUT_REDIRECT_INVALID', 'PAYMENT_MODE_MISMATCH', 'DEPLOYMENT_CONFIGURATION_INVALID'].includes(error?.code)) {
+    return Response.json({ error: error.message, code: error.code }, { status: error.status });
+  }
   if (error?.code === 'SERVER_CONFIGURATION_MISSING') {
     return Response.json({ error: error.message, code: error.code }, { status: 503 });
   }

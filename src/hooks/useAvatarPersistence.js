@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useCallback } from 'react';
 import { useAvatarStore } from './useAvatarStore';
+import { useToast } from '@/components/ui/use-toast';
 import {
   hydrateRuntimeFromUserConfig, buildCanonicalConfig, fingerprintConfig, persistAvatarProfile,
 } from '@/lib/avatarPersistence';
@@ -17,11 +18,15 @@ import {
 const AUTO_SAVE_DEBOUNCE = 3000; // ms
 
 export function useAvatarPersistence({ user, onUserUpdate }) {
+  const { toast } = useToast();
   const { avatarState, loadFullState, markSaved } = useAvatarStore();
   const autoSaveTimerRef = useRef(null);
   const isRestoredRef = useRef(false);
   const lastPersistedFpRef = useRef('');
   const rejectedFpRef = useRef('');
+  const revisionRef = useRef(user?.avatar_config?.revision ?? 0);
+  const conflictedRef = useRef(false);
+  const savingRef = useRef(false);
 
   // ── Restore avatar state from user.avatar_config on login ────────────────
   const restoreFromProfile = useCallback((userProfile) => {
@@ -30,6 +35,8 @@ export function useAvatarPersistence({ user, onUserUpdate }) {
     if (!hydrated || !hydrated.avatarSource) return null;
 
     isRestoredRef.current = true;
+    revisionRef.current = userProfile.avatar_config?.revision ?? 0;
+    conflictedRef.current = false;
     lastPersistedFpRef.current = fingerprintConfig(buildCanonicalConfig(hydrated));
 
     loadFullState({
@@ -51,6 +58,8 @@ export function useAvatarPersistence({ user, onUserUpdate }) {
     isRestoredRef.current = false;
     lastPersistedFpRef.current = '';
     rejectedFpRef.current = '';
+    revisionRef.current = user?.avatar_config?.revision ?? 0;
+    conflictedRef.current = false;
   }, [user?.id]);
 
   // ── Auto-save through saveAvatarProfile (ownership-validated) ───────────
@@ -74,10 +83,18 @@ export function useAvatarPersistence({ user, onUserUpdate }) {
 
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(async () => {
+      if (savingRef.current || conflictedRef.current) return;
+      savingRef.current = true;
       const res = await persistAvatarProfile(config, {
-        onUserUpdate: (cfg) => { if (onUserUpdate) onUserUpdate((prev) => (prev ? { ...prev, avatar_config: cfg } : prev)); },
+        expectedRevision: revisionRef.current,
+        onUserUpdate: (cfg) => { revisionRef.current = cfg.revision; if (onUserUpdate) onUserUpdate((prev) => (prev ? { ...prev, avatar_config: cfg } : prev)); },
         onUnauthorized: () => { rejectedFpRef.current = fp; },
       });
+      savingRef.current = false;
+      if (res.status === 409) {
+        conflictedRef.current = true;
+        toast({ variant: 'destructive', title: 'Avatar changed elsewhere', description: res.error });
+      }
       if (res.success) {
         lastPersistedFpRef.current = fp;
         rejectedFpRef.current = '';
@@ -102,6 +119,7 @@ export function useAvatarPersistence({ user, onUserUpdate }) {
     avatarState.currentRealm,
     onUserUpdate,
     markSaved,
+    toast,
   ]);
 
   return { restoreFromProfile };
